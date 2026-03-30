@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register New Member — Grace Chapel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: {50:'#fdf9ee',100:'#faf0cc',200:'#f4dc8a',300:'#eec548',400:'#e6ac1f',500:'#c98e10',600:'#a06e0c',700:'#7a500d',800:'#5c3c10',900:'#3d280d'},
+            wine: {500:'#d43a58',600:'#b92040',700:'#9a1a35'},
+            parch: {50:'#fdfbf7',100:'#faf5ec',200:'#f3e8d0',300:'#e9d5ab',400:'#dab97a',500:'#c9994d',600:'#a97838',700:'#865d2c',800:'#664827',900:'#4d3720'},
+          },
+          fontFamily: { serif: ['Playfair Display','serif'], sans: ['DM Sans','sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: url('https://images.unsplash.com/photo-1568605114967-8130f3a36994?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NjAxNDR8MHwxfHNlYXJjaHwxfHxjaHVyY2glMjBpbmteriorfGVufDB8fHx8MTY5NjA4MzA1Mw&ixlib=rb-4.0.3&q=80&w=1920') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 2rem 0;
+    }
+    h1, h2, .font-display { font-family: 'Playfair Display', serif; }
+    .card {
+      background: rgba(255, 255, 255, 0.95); /* semi-transparent */
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(61,40,13,0.15);
+    }
+    .btn-gold { background: linear-gradient(135deg,#c98e10 0%,#a06e0c 100%); color:white; padding:0.5rem 1.25rem; border-radius:8px; font-weight:500; font-size:0.875rem; display:inline-flex; align-items:center; gap:0.35rem; transition: all 0.2s;}
+    .btn-gold:hover { background: linear-gradient(135deg,#a06e0c 0%,#7a500d 100%); box-shadow:0 4px 12px rgba(160,110,12,0.35); transform:translateY(-1px); }
+    .btn-outline { background:white; color:#5c3c10; border:1px solid #e9d5ab; padding:0.5rem 1.25rem; border-radius:8px; font-weight:500; font-size:0.875rem; display:inline-flex; align-items:center; gap:0.35rem; transition: all 0.2s;}
+    .btn-outline:hover { background:#faf5ec; border-color:#c98e10; }
+    .btn-danger { background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:0.5rem 1.25rem; border-radius:8px; font-weight:500; font-size:0.875rem; display:inline-flex; align-items:center; gap:0.35rem; transition: all 0.2s;}
+    .btn-danger:hover { background:#fecaca; }
+    .input-field { width:100%; border:1.5px solid #e9d5ab; border-radius:8px; padding:0.55rem 0.85rem; font-size:0.875rem; background:white; transition:border 0.2s, box-shadow 0.2s; color:#3d280d; font-family:'DM Sans', sans-serif; }
+    .input-field:focus { outline:none; border-color:#c98e10; box-shadow:0 0 0 3px rgba(201,142,16,0.12); }
+    select.input-field { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a06e0c' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 0.75rem center; padding-right:2.2rem; appearance:none; }
+    textarea.input-field { resize: vertical; min-height:90px; }
+    .form-label { display:block; font-size:0.8rem; font-weight:600; color:#5c3c10; margin-bottom:0.3rem; letter-spacing:0.01em; }
+    .fade-up { animation: fadeUp 0.35s ease-out; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  </style>
+</head>
+<body>
+
+<div class="max-w-3xl w-full px-4 fade-up">
+
+  <h1 class="text-3xl font-display font-semibold mb-2 text-amber-950 text-white">Register New Member</h1>
+  <p class="text-white mb-6">Fill in the details below carefully</p>
+
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+    <div class="mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+      {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="space-y-6">
+
+      <!-- Personal Info -->
+      <div class="card p-6">
+        <h3 class="font-display font-semibold text-amber-950 mb-5 flex items-center gap-2">
+          <i data-lucide="user" class="w-4 h-4 text-amber-500"></i> Personal Information
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="md:col-span-2">
+            <label class="form-label">Date <span class="text-red-400">*</span></label>
+            {{ form.first_visit_date }}
+          </div>
+          <div>
+            <label class="form-label">Surname <span class="text-red-400">*</span></label>
+            {{ form.last_name }}
+          </div>
+          <div>
+            <label class="form-label">First Name <span class="text-red-400">*</span></label>
+            {{ form.first_name }}
+          </div>
+          <div class="md:col-span-2">
+            <label class="form-label">Home Address</label>
+            {{ form.address }}
+          </div>
+          <div>
+            <label class="form-label">Phone Number</label>
+            {{ form.phone }}
+          </div>
+          <div>
+            <label class="form-label">Email</label>
+            {{ form.email }}
+          </div>
+          <div>
+            <label class="form-label">Vocation Address</label>
+            {{ form.vocation_address }}
+          </div>
+          <div>
+            <label class="form-label">Gender</label>
+            {{ form.gender }}
+          </div>
+          <div>
+            <label class="form-label">Age Bracket</label>
+            {{ form.age_bracket }}
+          </div>
+          <div>
+            <label class="form-label">Marital Status</label>
+            {{ form.marital_status }}
+          </div>
+          <div>
+            <label class="form-label">Invited By</label>
+            {{ form.invitee }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Church & Decision Info -->
+      <div class="card p-6">
+        <h3 class="font-display font-semibold text-amber-950 mb-5 flex items-center gap-2">
+          <i data-lucide="church" class="w-4 h-4 text-amber-500"></i> Church & Decision Information
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="form-label">Are you born again?</label>
+            {{ form.is_born_again }}
+          </div>
+          <div>
+            <label class="form-label">Are you deciding to join the church?</label>
+            {{ form.joining_church }}
+          </div>
+          <div class="md:col-span-2">
+            <label class="form-label">Preferred visit day or time</label>
+            {{ form.preferred_visit_time }}
+          </div>
+          <div class="md:col-span-2">
+            <label class="form-label">Prayer Point</label>
+            {{ form.prayer_requests }}
+          </div>
+          <div class="md:col-span-2">
+            <label class="form-label">Observation <span class="text-amber-400 text-xs font-normal ml-1"></span></label>
+            {{ form.observation }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-3 pt-4">
+        <button type="submit" class="btn-gold">
+          <i data-lucide="save" class="w-3.5 h-3.5"></i> Register Member
+        </button>
+        <a href="{% url 'public_member_register' %}" class="btn-outline">Cancel</a>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+<script>
+  lucide.createIcons();
+</script>
+</body>
+</html>

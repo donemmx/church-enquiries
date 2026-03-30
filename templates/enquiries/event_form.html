@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — Grace Chapel{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block content %}
+
+<div class="max-w-2xl">
+  <div class="card p-6">
+    {% if form.errors %}
+<div class="bg-red-50 border border-red-200 text-red-700 p-3 rounded mb-4">
+    {{ form.errors }}
+</div>
+{% endif %}
+    <form method="post" enctype="multipart/form-data" class="space-y-4">
+      {% csrf_token %}
+      <div><label class="form-label">Event Title <span class="text-red-400">*</span></label>{{ form.title }}</div>
+      <div><label class="form-label">Description</label>{{ form.description }}</div>
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="form-label">Event Type</label>{{ form.event_type }}</div>
+        <div><label class="form-label">Venue</label>{{ form.venue }}</div>
+        <div><label class="form-label">Start Date & Time <span class="text-red-400">*</span></label>{{ form.start_date }}</div>
+        <div><label class="form-label">End Date & Time <span class="text-red-400">*</span></label>{{ form.end_date }}</div>
+        <div><label class="form-label">Max Attendees</label>{{ form.max_attendees }}</div>
+        <div><label class="form-label">Target Audience</label>{{ form.target_audience }}</div>
+      </div>
+      <div class="flex items-center gap-2">
+        {{ form.send_notifications }}
+        <label class="text-sm font-medium text-amber-800">Send notifications to members</label>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="btn-gold"><i data-lucide="save" class="w-3.5 h-3.5"></i>Save Event</button>
+        <a href="{% url 'event_list' %}" class="btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>document.querySelectorAll('select,input,textarea').forEach(el => { if (!el.classList.contains('input-field') && el.type !== 'checkbox') el.classList.add('input-field'); });</script>
+{% endblock %}

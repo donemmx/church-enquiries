@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Reports — Grace Chapel{% endblock %}
+{% block page_title %}
+  {% if can_see_all %}Reports &amp; Analytics{% elif section == 'greeters' %}Greeters Reports{% else %}Follow-Up Reports{% endif %}
+{% endblock %}
+{% block page_subtitle %}
+  {% if can_see_all %}Full ministry performance metrics{% elif section == 'greeters' %}Greeters section metrics{% else %}Follow-Up section metrics{% endif %}
+{% endblock %}
+
+{% block content %}
+
+{# ── Monthly summary ── #}
+<div class="grid grid-cols-1 md:grid-cols-{% if can_see_all or section == 'followup' %}3{% else %}2{% endif %} gap-4 mb-6">
+
+  <div class="card p-5 text-center border-t-4 border-amber-400">
+    <p class="text-3xl font-bold text-amber-950" style="font-family:'Playfair Display',serif;">{{ monthly_new }}</p>
+    <p class="text-sm text-amber-500 mt-1 font-medium">New Members This Month</p>
+  </div>
+
+  {% if can_see_all or section == 'followup' %}
+  <div class="card p-5 text-center border-t-4 border-green-400">
+    <p class="text-3xl font-bold text-amber-950" style="font-family:'Playfair Display',serif;">{{ monthly_followups_done }}</p>
+    <p class="text-sm text-amber-500 mt-1 font-medium">Follow-Ups Completed</p>
+  </div>
+  {% endif %}
+
+  {% if can_see_all %}
+  <div class="card p-5 text-center border-t-4 border-blue-400">
+    <p class="text-3xl font-bold text-amber-950" style="font-family:'Playfair Display',serif;">{{ monthly_messages }}</p>
+    <p class="text-sm text-amber-500 mt-1 font-medium">Messages Sent</p>
+  </div>
+  {% endif %}
+
+</div>
+
+{# ── Breakdown cards ── #}
+<div class="grid grid-cols-1 {% if can_see_all or section == 'followup' %}lg:grid-cols-2{% endif %} gap-5 mb-5">
+
+  {# Member status breakdown — all sections see this #}
+  <div class="card p-5">
+    <h3 style="font-family:'Playfair Display',serif;" class="font-semibold text-amber-950 mb-4">Member Status Breakdown</h3>
+    <div class="space-y-3">
+      {% for item in status_breakdown %}
+      <div>
+        <div class="flex justify-between mb-1">
+          <span class="text-sm font-medium text-amber-800 capitalize">{{ item.status }}</span>
+          <span class="text-sm font-bold text-amber-950">{{ item.count }}</span>
+        </div>
+        <div class="h-2 bg-amber-50 rounded-full overflow-hidden">
+          <div class="h-full rounded-full
+            {% if item.status == 'new' %}bg-blue-400
+            {% elif item.status == 'returning' %}bg-indigo-400
+            {% elif item.status == 'regular' %}bg-green-400
+            {% elif item.status == 'member' %}bg-amber-400
+            {% else %}bg-gray-300{% endif %}">
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-sm text-amber-400 text-center py-4">No member data yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  {# Follow-up breakdown — followup section and superuser only #}
+  {% if can_see_all or section == 'followup' %}
+  <div class="card p-5">
+    <h3 style="font-family:'Playfair Display',serif;" class="font-semibold text-amber-950 mb-4">Follow-Up Status Breakdown</h3>
+    <div class="space-y-3">
+      {% for item in followup_breakdown %}
+      <div class="flex items-center justify-between p-3 rounded-xl border border-amber-50">
+        <div class="flex items-center gap-2">
+          <div class="w-2.5 h-2.5 rounded-full
+            {% if item.status == 'completed' %}bg-green-400
+            {% elif item.status == 'in_progress' %}bg-blue-400
+            {% elif item.status == 'pending' %}bg-amber-400
+            {% else %}bg-red-300{% endif %}">
+          </div>
+          <span class="text-sm font-medium text-amber-800 capitalize">{{ item.status }}</span>
+        </div>
+        <span class="text-lg font-bold text-amber-950">{{ item.count }}</span>
+      </div>
+      {% empty %}
+      <p class="text-sm text-amber-400 text-center py-4">No follow-up data yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# Greeter-specific: members-by-greeter breakdown #}
+  {% if not can_see_all and section == 'greeters' %}
+  <div class="card p-5">
+    <h3 style="font-family:'Playfair Display',serif;" class="font-semibold text-amber-950 mb-4">Members by Greeter</h3>
+    <div class="space-y-3">
+      {% for item in greeter_breakdown %}
+      <div class="flex items-center justify-between p-3 rounded-xl border border-amber-50">
+        <div class="flex items-center gap-2">
+          <div class="avatar text-xs bg-teal-100 text-teal-800 font-bold" style="width:28px;height:28px;font-size:0.7rem;">
+            {{ item.greeter__first_name|slice:":1"|upper }}{{ item.greeter__last_name|slice:":1"|upper }}
+          </div>
+          <span class="text-sm font-medium text-amber-800">
+            {{ item.greeter__first_name }} {{ item.greeter__last_name }}
+          </span>
+        </div>
+        <span class="text-lg font-bold text-amber-950">{{ item.count }}</span>
+      </div>
+      {% empty %}
+      <p class="text-sm text-amber-400 text-center py-4">No assignments yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+{# ── Export links ── #}
+<div class="card p-5">
+  <h3 style="font-family:'Playfair Display',serif;" class="font-semibold text-amber-950 mb-4">Quick Links</h3>
+  <div class="flex flex-wrap gap-3">
+    <a href="{% url 'member_list' %}" class="btn-outline">
+      <i data-lucide="users" class="w-3.5 h-3.5"></i>Member List
+    </a>
+    {% if can_see_all or section == 'followup' %}
+    <a href="{% url 'followup_list' %}" class="btn-outline">
+      <i data-lucide="check-square" class="w-3.5 h-3.5"></i>Follow-Ups
+    </a>
+    {% endif %}
+    <a href="{% url 'prayer_list' %}" class="btn-outline">
+      <i data-lucide="heart" class="w-3.5 h-3.5"></i>Prayer Requests
+    </a>
+  </div>
+</div>
+
+{% endblock %}

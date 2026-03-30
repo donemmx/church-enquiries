@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Record Attendance — Grace Chapel{% endblock %}
+{% block page_title %}Record Attendance{% endblock %}
+{% block content %}
+<div class="max-w-md">
+  <div class="card p-6">
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <div><label class="form-label">Member <span class="text-red-400">*</span></label>{{ form.member }}</div>
+      <div><label class="form-label">Date <span class="text-red-400">*</span></label>{{ form.date }}</div>
+      <div><label class="form-label">Service Type</label>{{ form.service_type }}</div>
+      <div><label class="form-label">Notes</label>{{ form.notes }}</div>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="btn-gold"><i data-lucide="save" class="w-3.5 h-3.5"></i>Record</button>
+        <a href="{% url 'attendance_list' %}" class="btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>document.querySelectorAll('select,input,textarea').forEach(el => { if (!el.classList.contains('input-field') && el.type !== 'checkbox') el.classList.add('input-field'); });</script>
+{% endblock %}

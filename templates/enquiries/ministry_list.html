@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Ministries — Grace Chapel{% endblock %}
+{% block page_title %}Ministries{% endblock %}
+{% block header_actions %}
+<a href="{% url 'ministry_create' %}" class="btn-gold text-xs"><i data-lucide="plus" class="w-3.5 h-3.5"></i>Add Ministry</a>
+{% endblock %}
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+  {% for ministry in ministries %}
+  <div class="card p-5">
+    <div class="flex items-start gap-3 mb-3">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#faf0cc;">
+        <i data-lucide="book-open" class="w-4 h-4" style="color:#a06e0c;"></i>
+      </div>
+      <div>
+        <h4 class="font-semibold text-amber-950">{{ ministry.name }}</h4>
+        <p class="text-xs text-amber-400">{{ ministry.member_count }} interested member{{ ministry.member_count|pluralize }}</p>
+      </div>
+    </div>
+    {% if ministry.description %}<p class="text-sm text-amber-700 leading-relaxed">{{ ministry.description }}</p>{% endif %}
+    {% if ministry.leader %}<p class="text-xs text-amber-500 mt-2 flex items-center gap-1"><i data-lucide="user" class="w-3 h-3"></i>Led by {{ ministry.leader.get_full_name }}</p>{% endif %}
+  </div>
+  {% empty %}
+  <div class="col-span-3 text-center py-12">
+    <i data-lucide="book-open" class="w-14 h-14 text-amber-100 mx-auto mb-3"></i>
+    <p class="text-amber-400 font-medium">No ministries yet</p>
+    <a href="{% url 'ministry_create' %}" class="btn-gold mt-4 inline-flex">Add First Ministry</a>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

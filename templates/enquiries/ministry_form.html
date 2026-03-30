@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — Grace Chapel{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="max-w-lg">
+  <div class="card p-6">
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <div><label class="form-label">Ministry Name <span class="text-red-400">*</span></label>{{ form.name }}</div>
+      <div><label class="form-label">Description</label>{{ form.description }}</div>
+      <div><label class="form-label">Ministry Leader</label>{{ form.leader }}</div>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="btn-gold"><i data-lucide="save" class="w-3.5 h-3.5"></i>Save</button>
+        <a href="{% url 'ministry_list' %}" class="btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>document.querySelectorAll('select,input,textarea').forEach(el => { if (!el.classList.contains('input-field') && el.type !== 'checkbox') el.classList.add('input-field'); });</script>
+{% endblock %}

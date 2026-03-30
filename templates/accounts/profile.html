@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}My Profile — Grace Chapel{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+{% block content %}
+<div class="max-w-lg">
+  <div class="card p-6">
+    <div class="flex items-center gap-4 mb-6 pb-6 border-b border-amber-50">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-200 to-amber-500 flex items-center justify-center text-amber-900 font-bold text-xl shadow">
+        {{ user.first_name|slice:":1"|upper }}{{ user.last_name|slice:":1"|upper }}
+      </div>
+      <div>
+        <h3 style="font-family:'Playfair Display',serif;" class="text-xl font-bold text-amber-950">{{ user.get_full_name|default:user.username }}</h3>
+        <p class="text-sm text-amber-500">@{{ user.username }}</p>
+        <span class="badge {% if user.profile.role == 'admin' %}bg-red-100 text-red-700{% elif user.profile.role == 'head' %}bg-amber-100 text-amber-700{% elif user.profile.role == 'assistant' %}bg-blue-100 text-blue-700{% else %}bg-gray-100 text-gray-600{% endif %} mt-1 inline-block">
+          {{ user.profile.get_role_display|default:user.profile.role }}
+        </span>
+      </div>
+    </div>
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="form-label">First Name</label><input type="text" name="first_name" value="{{ user.first_name }}" class="input-field"></div>
+        <div><label class="form-label">Last Name</label><input type="text" name="last_name" value="{{ user.last_name }}" class="input-field"></div>
+      </div>
+      <div><label class="form-label">Email</label><input type="email" name="email" value="{{ user.email }}" class="input-field"></div>
+      <div><label class="form-label">Phone</label><input type="tel" name="phone" value="{{ user.profile.phone|default:'' }}" class="input-field"></div>
+      <button type="submit" class="btn-gold"><i data-lucide="save" class="w-3.5 h-3.5"></i>Update Profile</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

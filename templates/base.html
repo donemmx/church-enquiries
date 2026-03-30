@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Parach Chapel — Enquiries{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              gold: { 50:'#fdf9ee', 100:'#faf0cc', 200:'#f4dc8a', 300:'#eec548', 400:'#e6ac1f', 500:'#c98e10', 600:'#a06e0c', 700:'#7a500d', 800:'#5c3c10', 900:'#3d280d' },
+              wine: { 500:'#d43a58', 600:'#b92040', 700:'#9a1a35' },
+              parch: { 50:'#fdfbf7', 100:'#faf5ec', 200:'#f3e8d0', 300:'#e9d5ab', 400:'#dab97a', 500:'#c9994d', 600:'#a97838', 700:'#865d2c', 800:'#664827', 900:'#4d3720' },
+            },
+            fontFamily: { serif: ['Playfair Display', 'serif'], sans: ['DM Sans', 'sans-serif'] }
+          }
+        }
+      }
+    </script>
+    <style>
+      body { font-family: 'DM Sans', sans-serif; background: #fdfbf7; }
+      h1, h2, .font-display { font-family: 'Playfair Display', serif; }
+      .sidebar { background: linear-gradient(180deg, #3d280d 0%, #5c3c10 60%, #4d3720 100%); }
+      .sidebar-link { transition: all 0.2s; border-right: 3px solid transparent; }
+      .sidebar-link:hover { background: rgba(233,213,171,0.15); color: #f4dc8a; }
+      .sidebar-link.active { background: rgba(233,213,171,0.2); color: #eec548; border-right-color: #c98e10; font-weight: 600; }
+      .card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(61,40,13,0.06), 0 4px 16px rgba(61,40,13,0.04); }
+      .btn-gold { background: linear-gradient(135deg, #c98e10 0%, #a06e0c 100%); color: white; padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.35rem; }
+      .btn-gold:hover { background: linear-gradient(135deg, #a06e0c 0%, #7a500d 100%); box-shadow: 0 4px 12px rgba(160,110,12,0.35); transform: translateY(-1px); }
+      .btn-outline { background: white; color: #5c3c10; border: 1px solid #e9d5ab; padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.35rem; }
+      .btn-outline:hover { background: #faf5ec; border-color: #c98e10; }
+      .btn-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.35rem; }
+      .btn-danger:hover { background: #fecaca; }
+      .input-field { width: 100%; border: 1.5px solid #e9d5ab; border-radius: 8px; padding: 0.55rem 0.85rem; font-size: 0.875rem; background: white; transition: border 0.2s, box-shadow 0.2s; color: #3d280d; font-family: 'DM Sans', sans-serif; }
+      .input-field:focus { outline: none; border-color: #c98e10; box-shadow: 0 0 0 3px rgba(201,142,16,0.12); }
+      select.input-field { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a06e0c' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2.2rem; appearance: none; }
+      textarea.input-field { resize: vertical; min-height: 90px; }
+      .badge { padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.01em; }
+      .badge-new { background: #dbeafe; color: #1e40af; }
+      .badge-returning { background: #e0e7ff; color: #4338ca; }
+      .badge-regular { background: #d1fae5; color: #065f46; }
+      .badge-member { background: #faf0cc; color: #a06e0c; }
+      .badge-inactive { background: #f3f4f6; color: #6b7280; }
+      .badge-pending { background: #fef3c7; color: #92400e; }
+      .badge-completed { background: #d1fae5; color: #065f46; }
+      .badge-in_progress { background: #dbeafe; color: #1e40af; }
+      .badge-no_response { background: #fee2e2; color: #991b1b; }
+      .badge-upcoming { background: #e0e7ff; color: #4338ca; }
+      .badge-draft { background: #f3f4f6; color: #6b7280; }
+      .badge-sent { background: #d1fae5; color: #065f46; }
+      .badge-scheduled { background: #fef3c7; color: #92400e; }
+      .alert-success { background: #f0fdf4; border-left: 4px solid #22c55e; color: #166534; }
+      .alert-error { background: #fef2f2; border-left: 4px solid #ef4444; color: #991b1b; }
+      .alert-warning { background: #fffbeb; border-left: 4px solid #f59e0b; color: #92400e; }
+      .cross-bg { background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M18 0h4v40h-4zM0 18h40v4H0z' fill='%23c98e10' fill-opacity='0.03'/%3E%3C/svg%3E"); }
+      @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+      .fade-up { animation: fadeUp 0.35s ease-out; }
+      ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: #faf5ec; } ::-webkit-scrollbar-thumb { background: #dab97a; border-radius: 3px; }
+      .form-label { display: block; font-size: 0.8rem; font-weight: 600; color: #5c3c10; margin-bottom: 0.3rem; letter-spacing: 0.01em; }
+      .table-row:hover { background: #fdfbf7; }
+      .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+      .section-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; }
+      .section-pill-greeters { background: rgba(29,158,117,0.18); color: #9FE1CB; }
+      .section-pill-followup  { background: rgba(186,117,23,0.2);  color: #FAC775; }
+      .section-pill-all       { background: rgba(127,119,221,0.2); color: #CECBF6; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="cross-bg min-h-screen">
+
+{% if user.is_authenticated %}
+
+{# ── Resolve role/section once for the whole template ── #}
+{% with profile=user.profile section=user.profile.section role=user.profile.role %}
+{% with is_super=user.is_superuser %}
+{% with can_see_all=is_super|default:False %}
+
+<div class="flex min-h-screen">
+
+  <!-- ═══════════════════════════════════════════
+       SIDEBAR
+  ═══════════════════════════════════════════ -->
+  <aside class="sidebar w-64 flex-shrink-0 fixed top-0 left-0 h-full z-30 flex flex-col overflow-y-auto">
+
+    <!-- Brand -->
+    <div class="px-5 py-6 border-b border-white/10">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-yellow-300 to-yellow-600 flex items-center justify-center shadow">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+        </div>
+        <div>
+          <p style="font-family:'Playfair Display',serif;" class="text-yellow-100 font-semibold text-sm">Parach Chapel</p>
+          <p class="text-yellow-500/60 text-xs">Enquiries Portal</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- User info + section pill -->
+    <div class="px-4 py-3 border-b border-white/10">
+      <div class="flex items-center gap-2.5 rounded-xl px-3 py-2" style="background:rgba(255,255,255,0.07);">
+        <div class="avatar bg-gradient-to-br from-yellow-400 to-amber-600 text-white text-xs">
+          {{ user.first_name|slice:":1"|upper }}{{ user.last_name|slice:":1"|upper }}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-yellow-100 text-xs font-semibold truncate">{{ user.get_full_name|default:user.username }}</p>
+          <div class="flex items-center gap-1 mt-0.5">
+            {# Role label #}
+            {% if role == 'admin' %}
+              <span class="text-yellow-500/70 text-xs">Administrator</span>
+            {% elif role == 'section_admin' %}
+              <span class="text-yellow-500/70 text-xs">Section Admin</span>
+            {% else %}
+              <span class="text-yellow-500/70 text-xs">Staff</span>
+            {% endif %}
+            {# Section pill #}
+            {% if section == 'greeters' %}
+              <span class="section-pill section-pill-greeters">Greeters</span>
+            {% elif section == 'followup' %}
+              <span class="section-pill section-pill-followup">Follow-up</span>
+            {% elif section == 'all' or is_super %}
+              <span class="section-pill section-pill-all">All</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+
+      <!-- {# ────────────────────────────────────────
+         SUPERUSER / GLOBAL ADMIN — sees everything
+      ──────────────────────────────────────── #} -->
+      {% if is_super or role == 'admin' and section == 'all' %}
+
+        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Overview</p>
+        <a href="{% url 'dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 flex-shrink-0"></i>Dashboard
+        </a>
+        <a href="{% url 'member_list' %}" class="sidebar-link {% if 'member' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>Members
+        </a>
+        <!-- <a href="{% url 'followup_list' %}"
+          class="sidebar-link {% if request.resolver_match.url_name == 'followup_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="check-square" class="w-4 h-4 flex-shrink-0"></i>
+          Follow-Ups
+        </a> -->
+
+        <a href="{% url 'greeter_list' %}"
+          class="sidebar-link {% if request.resolver_match.url_name == 'greeter_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>
+          Greeters
+        </a>
+
+        <a href="{% url 'integration_list' %}"
+          class="sidebar-link {% if request.resolver_match.url_name == 'integration_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="check-square" class="w-4 h-4 flex-shrink-0"></i>
+          Integrations
+        </a>
+        <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>Contact Logs
+        </a>
+
+        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Communication</p>
+        <a href="{% url 'message_list' %}" class="sidebar-link {% if 'message' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>Messages
+        </a>
+        <a href="{% url 'prayer_list' %}" class="sidebar-link {% if 'prayer' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="heart" class="w-4 h-4 flex-shrink-0"></i>Prayer Requests
+        </a>
+
+        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Admin</p>
+        <a href="{% url 'admin_panel' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="shield" class="w-4 h-4 flex-shrink-0"></i>Admin Panel
+        </a>
+        <a href="{% url 'admin_staff' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_staff' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="user-cog" class="w-4 h-4 flex-shrink-0"></i>Staff Management
+        </a>
+        <a href="{% url 'admin_reports' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_reports' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="bar-chart-2" class="w-4 h-4 flex-shrink-0"></i>Reports
+        </a>
+
+      <!-- {# ────────────────────────────────────────
+         GREETERS — section admin
+      ──────────────────────────────────────── #} -->
+      {% elif section == 'greeters' and role == 'section_admin' %}
+
+        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Greeters</p>
+        <a href="{% url 'member_list' %}" class="sidebar-link {% if 'member' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>Members
+        </a>
+        <a href="{% url 'greeter_list' %}"
+          class="sidebar-link {% if request.resolver_match.url_name == 'greeter_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>
+          Greeters
+        </a>
+        <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>Contact Logs
+        </a>
+        <a href="{% url 'prayer_list' %}" class="sidebar-link {% if 'prayer' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="heart" class="w-4 h-4 flex-shrink-0"></i>Prayer Requests
+        </a>
+        <a href="{% url 'message_list' %}" class="sidebar-link {% if 'message' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>Messages
+        </a>
+
+        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Admin</p>
+        <a href="{% url 'admin_panel' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="shield" class="w-4 h-4 flex-shrink-0"></i>Section Panel
+        </a>
+        <a href="{% url 'admin_staff' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_staff' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="user-cog" class="w-4 h-4 flex-shrink-0"></i>Staff Management
+        </a>
+        <a href="{% url 'admin_reports' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_reports' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="bar-chart-2" class="w-4 h-4 flex-shrink-0"></i>Reports
+        </a>
+
+      <!-- {# ────────────────────────────────────────
+         GREETERS — regular staff
+      ──────────────────────────────────────── #} -->
+      {% elif section == 'greeters' and role == 'staff' %}
+
+        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Greeters</p>
+        <!-- <a href="{% url 'member_list' %}" class="sidebar-link {% if 'member' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>My Members
+        </a> -->
+        <a href="{% url 'greeter_list' %}"
+          class="sidebar-link {% if request.resolver_match.url_name == 'greeter_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>
+          Greeters
+        </a>
+        <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>Contact Logs
+        </a>
+        <a href="{% url 'prayer_list' %}" class="sidebar-link {% if 'prayer' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="heart" class="w-4 h-4 flex-shrink-0"></i>Prayer Requests
+        </a>
+
+      <!-- {# ────────────────────────────────────────
+         FOLLOW-UP — section admin
+      ──────────────────────────────────────── #} -->
+      {% elif section == 'followup' and role == 'section_admin' %}
+
+        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Follow-Up</p>
+        <a href="{% url 'member_list' %}" class="sidebar-link {% if 'member' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>Members
+        </a>
+        <!-- <a href="{% url 'followup_list' %}" class="sidebar-link {% if 'followup' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="check-square" class="w-4 h-4 flex-shrink-0"></i>Follow-Ups
+        </a> -->
+        <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>Contact Logs
+        </a>
+        <a href="{% url 'prayer_list' %}" class="sidebar-link {% if 'prayer' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="heart" class="w-4 h-4 flex-shrink-0"></i>Prayer Requests
+        </a>
+        <a href="{% url 'message_list' %}" class="sidebar-link {% if 'message' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>Messages
+        </a>
+
+        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Admin</p>
+        <a href="{% url 'admin_panel' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="shield" class="w-4 h-4 flex-shrink-0"></i>Section Panel
+        </a>
+        <a href="{% url 'admin_staff' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_staff' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="user-cog" class="w-4 h-4 flex-shrink-0"></i>Staff Management
+        </a>
+        <a href="{% url 'admin_reports' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_reports' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="bar-chart-2" class="w-4 h-4 flex-shrink-0"></i>Reports
+        </a>
+
+      <!-- {# ────────────────────────────────────────
+         FOLLOW-UP — regular staff
+      ──────────────────────────────────────── #} -->
+      {% elif section == 'followup' and role == 'staff' %}
+
+        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Follow-Up</p>
+        <a href="{% url 'member_list' %}" class="sidebar-link {% if 'member' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>My Members
+        </a>
+        <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>Contact Logs
+        </a>
+        <!-- <a href="{% url 'followup_list' %}" class="sidebar-link {% if 'followup' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="check-square" class="w-4 h-4 flex-shrink-0"></i>My Follow-Ups
+        </a> -->
+        <a href="{% url 'prayer_list' %}" class="sidebar-link {% if 'prayer' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="heart" class="w-4 h-4 flex-shrink-0"></i>Prayer Requests
+        </a>
+
+      {% endif %}
+      {# end role/section branching #}
+
+    </nav>
+
+    <!-- Bottom: profile + logout (always visible) -->
+    <div class="px-3 pb-5 border-t border-white/10 pt-3 space-y-0.5">
+      <a href="{% url 'profile' %}" class="sidebar-link flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        <i data-lucide="user" class="w-4 h-4"></i>My Profile
+      </a>
+      <a href="{% url 'logout' %}" class="sidebar-link flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-500/60 text-sm hover:text-red-400">
+        <i data-lucide="log-out" class="w-4 h-4"></i>Sign Out
+      </a>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════════ -->
+  <main class="flex-1 flex flex-col min-h-screen" style="margin-left:256px;">
+
+    <header class="sticky top-0 z-20 bg-white/85 backdrop-blur-md border-b border-amber-100 px-6 py-3.5 flex items-center justify-between">
+      <div>
+        <h2 style="font-family:'Playfair Display',serif;" class="text-lg font-semibold text-amber-950">{% block page_title %}{% endblock %}</h2>
+        <p class="text-xs text-amber-700/50 mt-0.5">{% block page_subtitle %}{% endblock %}</p>
+      </div>
+      <div class="flex items-center gap-2">
+        {% block header_actions %}{% endblock %}
+        {# Only show New Member button to section admins and above — not plain staff #}
+        {% if is_super or role == 'admin' or role == 'section_admin' %}
+        <a href="{% url 'member_create' %}" class="btn-gold text-xs">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>New Member
+        </a>
+        {% endif %}
+      </div>
+    </header>
+
+    <div class="flex-1 p-6 fade-up">
+      {% if messages %}
+      <div class="mb-4 space-y-2">
+        {% for message in messages %}
+        <div class="alert-{{ message.tags|default:'success' }} flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+          <i data-lucide="{% if 'error' in message.tags %}x-circle{% elif 'warning' in message.tags %}alert-triangle{% else %}check-circle{% endif %}" class="w-4 h-4 flex-shrink-0"></i>
+          {{ message }}
+          <button onclick="this.parentElement.remove()" class="ml-auto opacity-60 hover:opacity-100"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </div>
+
+    <footer class="py-3 px-6 text-center text-xs text-amber-400/60 border-t border-amber-50 bg-white/40">
+      &copy; {% now "Y" %} Parach Chapel Enquiries Portal &mdash; Serving with Excellence
+    </footer>
+  </main>
+
+</div>
+
+{% endwith %}{% endwith %}{% endwith %}
+
+{% else %}
+{% block auth_content %}{% endblock %}
+{% endif %}
+
+<script>lucide.createIcons();</script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

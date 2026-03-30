@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — Grace Chapel{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Compose messages for email, SMS, prayer, or events{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+  <div class="card p-6">
+    <form method="post" id="msgForm" class="space-y-4">
+      {% csrf_token %}
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="form-label">Message Title <span class="text-red-400">*</span></label>{{ form.title }}</div>
+        <div><label class="form-label">Message Type <span class="text-red-400">*</span></label>{{ form.message_type }}</div>
+      </div>
+      <input type="hidden" name="status" value="new">
+      <div><label class="form-label">Subject (Email only)</label>{{ form.subject }}</div>
+      <div><label class="form-label">Message Body <span class="text-red-400">*</span></label>{{ form.body }}</div>
+      <div class="p-4 rounded-xl" style="background:#fdfbf7; border:1.5px dashed #e9d5ab;">
+        <div class="flex items-center gap-2 mb-3">
+          {{ form.send_to_all }}
+          <label class="text-sm font-semibold text-amber-800">Send to ALL active members</label>
+        </div>
+        <!-- <div id="recipientsField">
+          <label class="form-label">Or select specific recipients</label>
+          {{ form.recipients }}
+        </div> -->
+      </div>
+      <!-- <div><label class="form-label">Schedule (optional)</label>{{ form.scheduled_at }}</div> -->
+      <div class="flex gap-3 pt-2">
+        <button type="submit" name="action" value="send" class="btn-gold">
+          <i data-lucide="send" class="w-3.5 h-3.5"></i>Send Now
+        </button>
+        <button type="submit" name="action" value="draft" class="btn-outline">
+          <i data-lucide="save" class="w-3.5 h-3.5"></i>Save Draft
+        </button>
+        <a href="{% url 'message_list' %}" class="btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+  document.querySelectorAll('select,input,textarea').forEach(el => {
+    if (!el.classList.contains('input-field') && el.type !== 'checkbox') el.classList.add('input-field');
+  });
+</script>
+{% endblock %}

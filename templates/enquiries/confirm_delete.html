@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Confirm Delete — Grace Chapel{% endblock %}
+{% block page_title %}Confirm Deletion{% endblock %}
+{% block content %}
+<div class="max-w-md">
+  <div class="card p-6 text-center">
+    <div class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+      <i data-lucide="trash-2" class="w-6 h-6 text-red-500"></i>
+    </div>
+    <h3 style="font-family:'Playfair Display',serif;" class="text-lg font-bold text-amber-950 mb-2">Are you sure?</h3>
+    <p class="text-sm text-amber-600 mb-6">You are about to remove <strong>{{ object }}</strong>. This action cannot be undone.</p>
+    <form method="post" class="flex gap-3 justify-center">
+      {% csrf_token %}
+      <button type="submit" class="btn-danger">
+        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>Yes, Delete
+      </button>
+      <a href="javascript:history.back()" class="btn-outline">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

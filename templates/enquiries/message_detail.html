@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}{{ msg.title }} — Grace Chapel{% endblock %}
+{% block page_title %}{{ msg.title }}{% endblock %}
+{% block content %}
+<div class="max-w-2xl">
+  <div class="card p-6">
+    <div class="flex items-center justify-between mb-5">
+      <div class="flex items-center gap-2">
+        <span class="badge badge-{{ msg.status }}">{{ msg.get_status_display }}</span>
+        <span class="badge bg-amber-50 text-amber-700">{{ msg.get_message_type_display }}</span>
+      </div>
+      <p class="text-xs text-amber-400">{{ msg.created_at|date:"M d, Y g:i A" }}</p>
+    </div>
+    {% if msg.subject %}<p class="text-sm font-semibold text-amber-600 mb-3">Subject: {{ msg.subject }}</p>{% endif %}
+    <div class="p-4 rounded-xl bg-amber-50/50 border border-amber-100 text-sm text-amber-800 leading-relaxed whitespace-pre-wrap">{{ msg.body }}</div>
+    <div class="mt-5 pt-5 border-t border-amber-50 grid grid-cols-3 gap-4 text-center text-sm">
+      <div><p class="font-bold text-xl text-amber-950">{{ msg.total_sent }}</p><p class="text-amber-400 text-xs">Sent</p></div>
+      <div><p class="font-bold text-xl text-red-500">{{ msg.total_failed }}</p><p class="text-amber-400 text-xs">Failed</p></div>
+      <div><p class="font-bold text-xs text-amber-700">{% if msg.send_to_all %}All Members{% else %}Selected{% endif %}</p><p class="text-amber-400 text-xs">Recipients</p></div>
+    </div>
+
+    {# ── Contact Logs ── #}
+<div class="card p-5 mt-5">
+  <div class="flex items-center justify-between mb-4">
+    <h3 style="font-family:'Playfair Display',serif;" class="font-semibold text-amber-950">
+      Contact History
+    </h3>
+    <a href="{% url 'contact_log_create' member.pk %}" class="btn-gold text-xs">
+      <i data-lucide="plus" class="w-3.5 h-3.5"></i>Log Contact
+    </a>
+  </div>
+
+  {% if contact_logs %}
+  <div class="space-y-2">
+    {% for log in contact_logs %}
+    <div class="flex items-start gap-3 p-3 rounded-xl border border-amber-50 hover:border-amber-100 transition-colors">
+
+      {# Method icon #}
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0
+        {% if log.section == 'greeters' %}bg-teal-100{% else %}bg-indigo-100{% endif %}">
+        <i data-lucide="{% if log.method == 'call' %}phone{% elif log.method == 'sms' %}message-square{% elif log.method == 'email' %}mail{% elif log.method == 'visit' %}home{% elif log.method == 'whatsapp' %}message-circle{% else %}activity{% endif %}"
+           class="w-3.5 h-3.5 {% if log.section == 'greeters' %}text-teal-600{% else %}text-indigo-600{% endif %}"></i>
+      </div>
+
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-sm font-semibold text-amber-900">{{ log.get_method_display }}</span>
+          <span class="badge
+            {% if log.outcome == 'reached' %}bg-green-100 text-green-700
+            {% elif log.outcome == 'no_answer' %}bg-red-100 text-red-700
+            {% elif log.outcome == 'left_message' %}bg-blue-100 text-blue-700
+            {% elif log.outcome == 'visited' %}bg-purple-100 text-purple-700
+            {% else %}bg-gray-100 text-gray-600{% endif %}">
+            {{ log.get_outcome_display }}
+          </span>
+          <span class="text-xs
+            {% if log.section == 'greeters' %}text-teal-500{% else %}text-indigo-500{% endif %}
+            font-semibold uppercase tracking-wide">
+            {{ log.get_section_display }}
+          </span>
+        </div>
+        {% if log.notes %}
+        <p class="text-xs text-amber-600 mt-1">{{ log.notes }}</p>
+        {% endif %}
+        <p class="text-xs text-amber-400 mt-0.5">
+          {{ log.logged_by.get_full_name }} · {{ log.contacted_on|date:"M d, Y" }}
+        </p>
+      </div>
+
+      {# Delete — own log or section admin #}
+      {% if log.logged_by == request.user or is_section_admin %}
+      <form method="post" action="{% url 'contact_log_delete' log.pk %}" class="flex-shrink-0">
+        {% csrf_token %}
+        <button type="submit"
+                onclick="return confirm('Delete this log?')"
+                class="p-1.5 rounded-lg hover:bg-red-100 text-red-400 hover:text-red-800 transition-colors">
+          <i data-lucide="trash-2" class="w-3 h-3"></i>
+        </button>
+      </form>
+      {% endif %}
+
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-8">
+    <i data-lucide="activity" class="w-10 h-10 text-amber-100 mx-auto mb-2"></i>
+    <p class="text-amber-400 text-sm">No contact history yet</p>
+    <a href="{% url 'contact_log_create' member.pk %}" class="btn-gold mt-3 inline-flex text-xs">
+      <i data-lucide="plus" class="w-3.5 h-3.5"></i>Log First Contact
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+    <div class="mt-5">
+      <a href="{% url 'message_list' %}" class="btn-outline text-xs"><i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>Back to Messages</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

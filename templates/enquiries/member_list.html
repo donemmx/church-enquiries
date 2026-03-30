@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+{% block title %}Members — Grace Chapel{% endblock %}
+{% block page_title %}Members{% endblock %}
+{% block page_subtitle %}{{ total_count }} active member{{ total_count|pluralize }} in the database{% endblock %}
+
+{% block content %}
+
+{# Resolve section/role once for this template #}
+{% with profile=request.user.profile section=request.user.profile.section role=request.user.profile.role %}
+{% with is_super=request.user.is_superuser %}
+
+<!-- Filters -->
+<div class="card p-4 mb-5">
+  <form method="get" class="flex flex-wrap gap-3 items-end">
+    <div class="flex-1 min-w-48">
+      <label class="form-label">Search</label>
+      <div class="relative">
+        <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-amber-400"></i>
+        <input type="text" name="search" value="{{ search }}" placeholder="Name, email, or phone..." class="input-field pl-9">
+      </div>
+    </div>
+    <div class="w-40">
+      <label class="form-label">Status</label>
+      <select name="status" class="input-field">
+        <option value="">All Statuses</option>
+        {% for val, label in status_choices %}
+          <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="w-44">
+      <label class="form-label">
+        {% if section == 'greeters' %}Greeter{% else %}Assigned To{% endif %}
+      </label>
+      <select name="assigned" class="input-field">
+        <option value="">Anyone</option>
+        {% for s in staff %}
+          <option value="{{ s.pk }}" {% if assigned_filter == s.pk|stringformat:"s" %}selected{% endif %}>
+            {{ s.get_full_name|default:s.username }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn-gold">
+      <i data-lucide="filter" class="w-3.5 h-3.5"></i>Filter
+    </button>
+    {% if search or status_filter or assigned_filter %}
+    <a href="{% url 'member_list' %}" class="btn-outline">
+      <i data-lucide="x" class="w-3.5 h-3.5"></i>Clear
+    </a>
+    {% endif %}
+  </form>
+</div>
+
+<!-- Member Table -->
+<div class="card overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-amber-50" style="background:#fdfbf7;">
+          <th class="text-left px-5 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Member</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Contact</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Status</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">First Visit</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">
+            {% if section == 'greeters' %}Greeter{% elif section == 'followup' %}Follow-up Staff{% else %}Assigned To{% endif %}
+          </th>
+          {% if is_super or role == 'section_admin' or role == 'admin' %}
+          <th class="text-left px-4 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Quick Assign</th>
+          {% endif %}
+          <th class="text-right px-5 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-amber-50">
+        {% for member in members %}
+        <tr class="table-row">
+
+          <!-- Name + initials -->
+          <td class="px-5 py-3.5">
+            <div class="flex items-center gap-3">
+              <div class="avatar text-xs bg-gradient-to-br from-amber-200 to-amber-400 text-amber-900 font-bold">
+                {{ member.initials }}
+              </div>
+              <div>
+                <a href="{% url 'member_detail' member.pk %}" class="font-semibold text-amber-900 hover:text-amber-600 transition-colors">
+                  {{ member.get_full_name }}
+                </a>
+                {% if member.is_baptized %}
+                  <span class="ml-1 text-xs text-blue-600">✓ Baptized</span>
+                {% endif %}
+              </div>
+            </div>
+          </td>
+
+          <!-- Contact -->
+          <td class="px-4 py-3.5">
+            <p class="text-amber-700">{{ member.phone|default:"—" }}</p>
+            <p class="text-amber-400 text-xs">{{ member.email|default:"" }}</p>
+          </td>
+
+          <!-- Status badge -->
+          <td class="px-4 py-3.5">
+            <span class="badge badge-{{ member.status }}">{{ member.get_status_display }}</span>
+          </td>
+
+          <!-- First visit -->
+          <td class="px-4 py-3.5 text-amber-600">
+            {{ member.first_visit_date|date:"M d, Y" }}
+          </td>
+
+          <!-- Assigned to — section-aware display -->
+          <td class="px-4 py-3.5">
+            {% if section == 'greeters' %}
+              {% if member.greeter_assigned_to %}
+                <span class="text-amber-700 text-sm">{{ member.greeter_assigned_to.get_full_name }}</span>
+              {% else %}
+                <span class="text-amber-300 text-xs italic">Unassigned</span>
+              {% endif %}
+            {% elif section == 'followup' %}
+              {% if member.assigned_to %}
+                <span class="text-amber-700 text-sm">{{ member.assigned_to.get_full_name }}</span>
+              {% else %}
+                <span class="text-amber-300 text-xs italic">Unassigned</span>
+              {% endif %}
+            {% else %}
+              {# Superuser / all: show both #}
+              {% if member.greeter_assigned_to %}
+                <p class="text-amber-700 text-xs"><span class="font-medium">G:</span> {{ member.greeter_assigned_to.get_full_name }}</p>
+              {% endif %}
+              {% if member.assigned_to %}
+                <p class="text-amber-700 text-xs"><span class="font-medium">F:</span> {{ member.assigned_to.get_full_name }}</p>
+              {% endif %}
+              {% if not member.greeter_assigned_to and not member.assigned_to %}
+                <span class="text-amber-300 text-xs italic">Unassigned</span>
+              {% endif %}
+            {% endif %}
+          </td>
+
+          <!-- Quick Assign (section admins + superuser only) -->
+          {% if is_super or role == 'section_admin' or role == 'admin' %}
+          <td class="px-4 py-3.5">
+            <form method="post" action="{% url 'member_assign' member.pk %}" class="flex items-center gap-1.5">
+              {% csrf_token %}
+              {# For superuser show a section toggle, for section admins it's implicit #}
+              {% if is_super or role == 'admin' and section == 'all' %}
+                <select name="assign_as" class="input-field py-1 text-xs w-24">
+                  <option value="greeters">Greeter</option>
+                  <option value="followup">Follow-up</option>
+                </select>
+              {% else %}
+                {# Hidden — section is implicit from the user's own section #}
+                <input type="hidden" name="assign_as" value="{{ section }}">
+              {% endif %}
+              <select name="staff_id" class="input-field py-1 text-xs flex-1 min-w-0">
+                <option value="">— pick staff —</option>
+                {% for s in staff %}
+                  <option value="{{ s.pk }}"
+                    {% if section == 'greeters' and member.greeter_assigned_to.pk == s.pk %}selected{% endif %}
+                    {% if section == 'followup' and member.assigned_to.pk == s.pk %}selected{% endif %}>
+                    {{ s.get_full_name|default:s.username }}
+                  </option>
+                {% endfor %}
+              </select>
+              <button type="submit" class="p-1.5 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-700 transition-colors flex-shrink-0" title="Assign">
+                <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              </button>
+            </form>
+          </td>
+          {% endif %}
+
+          <!-- Row actions -->
+          <td class="px-5 py-3.5 text-right">
+            <div class="flex items-center justify-end gap-1">
+
+              <a href="{% url 'member_detail' member.pk %}"
+                 class="p-1.5 rounded-lg hover:bg-amber-100 text-amber-500 hover:text-amber-800 transition-colors"
+                 title="View">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+              </a>
+
+              {% if is_super or role == 'section_admin' or role == 'admin' %}
+              <a href="{% url 'member_edit' member.pk %}"
+                 class="p-1.5 rounded-lg hover:bg-amber-100 text-amber-500 hover:text-amber-800 transition-colors"
+                 title="Edit">
+                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+              </a>
+              {% endif %}
+
+              {# Follow-up action — followup section and above only #}
+              {% if is_super or role == 'admin' or section == 'followup' %}
+              <a href="{% url 'followup_create_for_member' member.pk %}"
+                 class="p-1.5 rounded-lg hover:bg-green-100 text-green-500 hover:text-green-800 transition-colors"
+                 title="Add Follow-Up">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+              </a>
+              {% endif %}
+
+              {# Delete — section admins and above only #}
+              {% if is_super or role == 'section_admin' or role == 'admin' %}
+              <a href="{% url 'member_delete' member.pk %}"
+                 class="p-1.5 rounded-lg hover:bg-red-100 text-red-500 hover:text-red-800 transition-colors"
+                 title="Delete">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </a>
+              {% endif %}
+              <a href="{% url 'contact_log_create' member.pk %}"
+   class="p-1.5 rounded-lg hover:bg-teal-100 text-teal-500 hover:text-teal-800 transition-colors"
+   title="Log Contact">
+  <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+</a>
+            </div>
+          </td>
+
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="{% if is_super or role == 'section_admin' or role == 'admin' %}7{% else %}6{% endif %}"
+              class="px-5 py-12 text-center">
+            <i data-lucide="users" class="w-12 h-12 text-amber-100 mx-auto mb-3"></i>
+            <p class="text-amber-400 font-medium">No members found</p>
+            <p class="text-amber-300 text-xs mt-1">Try adjusting your filters or add a new member</p>
+            {% if is_super or role == 'section_admin' or role == 'admin' %}
+            <a href="{% url 'member_create' %}" class="btn-gold mt-4 inline-flex">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>Add First Member
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if members.has_other_pages %}
+  <div class="px-5 py-4 border-t border-amber-50 flex items-center justify-between">
+    <p class="text-xs text-amber-400">Page {{ members.number }} of {{ members.paginator.num_pages }}</p>
+    <div class="flex items-center gap-1">
+      {% if members.has_previous %}
+      <a href="?page={{ members.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if assigned_filter %}&assigned={{ assigned_filter }}{% endif %}"
+         class="btn-outline py-1.5 px-3 text-xs">
+        <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>Prev
+      </a>
+      {% endif %}
+      {% if members.has_next %}
+      <a href="?page={{ members.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if assigned_filter %}&assigned={{ assigned_filter }}{% endif %}"
+         class="btn-outline py-1.5 px-3 text-xs">
+        Next<i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+{% endwith %}
+{% endwith %}
+{% endblock %}

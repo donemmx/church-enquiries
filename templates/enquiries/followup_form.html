@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — Grace Chapel{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Assign and schedule follow-up actions for members{% endblock %}
+
+{% block content %}
+<div class="max-w-xl">
+  <div class="card p-6">
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <div>
+        <label class="form-label">Member <span class="text-red-400">*</span></label>
+        {{ form.member }}
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">Follow-Up Type</label>
+          {{ form.follow_up_type }}
+        </div>
+        <div>
+          <label class="form-label">Priority</label>
+          {{ form.priority }}
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">Assign To <span class="text-red-400">*</span></label>
+          {{ form.assigned_to }}
+        </div>
+        <div>
+          <label class="form-label">Due Date <span class="text-red-400">*</span></label>
+          {{ form.due_date }}
+        </div>
+      </div>
+      <div>
+        <label class="form-label">Notes / Instructions</label>
+        {{ form.notes }}
+      </div>
+      {% if followup %}
+      <div>
+        <label class="form-label">Status</label>
+        {{ form.status }}
+      </div>
+      <div>
+        <label class="form-label">Outcome / Result</label>
+        {{ form.outcome }}
+      </div>
+      {% endif %}
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="btn-gold">
+          <i data-lucide="save" class="w-3.5 h-3.5"></i>{% if followup %}Update{% else %}Assign{% endif %}
+        </button>
+        <a href="{% url 'followup_list' %}" class="btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.querySelectorAll('select, input, textarea').forEach(el => {
+    if (!el.classList.contains('input-field')) el.classList.add('input-field');
+  });
+</script>
+{% endblock %}

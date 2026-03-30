@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Grace Chapel{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Good to see you, {{ user.first_name|default:user.username }}! Here's what's happening today.{% endblock %}
+
+{% block content %}
+<!-- Stats Row -->
+<div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+  <div class="card p-5 relative overflow-hidden col-span-1">
+    <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-10" style="background:#c98e10;"></div>
+    <div class="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style="background:#faf0cc;">
+      <i data-lucide="users" class="w-4 h-4" style="color:#a06e0c;"></i>
+    </div>
+    <p class="text-2xl font-bold text-amber-950">{{ total_members }}</p>
+    <p class="text-xs text-amber-600/70 mt-0.5 font-medium">Total Members</p>
+  </div>
+  <div class="card p-5 relative overflow-hidden col-span-1">
+    <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-10" style="background:#22c55e;"></div>
+    <div class="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style="background:#dcfce7;">
+      <i data-lucide="user-plus" class="w-4 h-4 text-green-600"></i>
+    </div>
+    <p class="text-2xl font-bold text-amber-950">{{ new_this_week }}</p>
+    <p class="text-xs text-amber-600/70 mt-0.5 font-medium">New This Week</p>
+  </div>
+  <div class="card p-5 relative overflow-hidden col-span-1">
+    <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-10" style="background:#f59e0b;"></div>
+    <div class="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style="background:#fef3c7;">
+      <i data-lucide="check-square" class="w-4 h-4 text-amber-600"></i>
+    </div>
+    <p class="text-2xl font-bold text-amber-950">{{ pending_followups }}</p>
+    <p class="text-xs text-amber-600/70 mt-0.5 font-medium">Pending Follow-Ups</p>
+    {% if overdue_followups > 0 %}<p class="text-xs text-red-500 mt-1 font-semibold">{{ overdue_followups }} overdue!</p>{% endif %}
+  </div>
+  <div class="card p-5 relative overflow-hidden col-span-1">
+    <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-10" style="background:#6366f1;"></div>
+    <div class="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style="background:#ede9fe;">
+      <i data-lucide="calendar" class="w-4 h-4 text-indigo-600"></i>
+    </div>
+    <p class="text-2xl font-bold text-amber-950">{{ upcoming_events }}</p>
+    <p class="text-xs text-amber-600/70 mt-0.5 font-medium">Upcoming Events</p>
+  </div>
+  <div class="card p-5 relative overflow-hidden col-span-1">
+    <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-10" style="background:#ec4899;"></div>
+    <div class="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style="background:#fce7f3;">
+      <i data-lucide="heart" class="w-4 h-4 text-pink-600"></i>
+    </div>
+    <p class="text-2xl font-bold text-amber-950">{{ prayer_requests }}</p>
+    <p class="text-xs text-amber-600/70 mt-0.5 font-medium">Prayer Requests</p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
+  <!-- Member Status Breakdown -->
+  <div class="card p-5">
+    <h3 style="font-family:'Playfair Display',serif;" class="font-semibold text-amber-950 mb-4">Member Status</h3>
+    <div class="space-y-3">
+      {% for key, label in status_choices %}
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-2.5 h-2.5 rounded-full {% if key == 'new' %}bg-blue-400{% elif key == 'returning' %}bg-indigo-400{% elif key == 'regular' %}bg-green-400{% elif key == 'member' %}bg-amber-500{% else %}bg-gray-400{% endif %}"></div>
+          <span class="text-sm text-amber-800">{{ label }}</span>
+        </div>
+        <span class="font-semibold text-amber-950 text-sm">{{ status_counts|default:"{}" }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="mt-4 pt-4 border-t border-amber-50">
+      <a href="{% url 'member_list' %}" class="text-xs text-amber-600 font-semibold hover:text-amber-800 flex items-center gap-1">
+        View all members <i data-lucide="arrow-right" class="w-3 h-3"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Upcoming Events -->
+  <div class="card p-5">
+    <h3 style="font-family:'Playfair Display',serif;" class="font-semibold text-amber-950 mb-4">Upcoming Events</h3>
+    {% if upcoming_event_list %}
+    <div class="space-y-3">
+      {% for event in upcoming_event_list %}
+      <a href="{% url 'event_detail' event.pk %}" class="flex items-start gap-3 group">
+        <div class="w-10 h-10 rounded-xl flex flex-col items-center justify-center flex-shrink-0 text-center" style="background:#faf0cc;">
+          <span class="text-xs font-bold text-amber-800 leading-none">{{ event.start_date|date:"d" }}</span>
+          <span class="text-xs text-amber-600/70 leading-none">{{ event.start_date|date:"M" }}</span>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-amber-900 group-hover:text-amber-600 transition-colors">{{ event.title }}</p>
+          <p class="text-xs text-amber-500">{{ event.venue }}</p>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-sm text-amber-400 text-center py-4">No upcoming events</p>
+    {% endif %}
+    <div class="mt-4 pt-4 border-t border-amber-50">
+      <a href="{% url 'event_create' %}" class="text-xs text-amber-600 font-semibold hover:text-amber-800 flex items-center gap-1">
+        Create event <i data-lucide="arrow-right" class="w-3 h-3"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="card p-5">
+    <h3 style="font-family:'Playfair Display',serif;" class="font-semibold text-amber-950 mb-4">Quick Actions</h3>
+    <div class="space-y-2">
+      <a href="{% url 'member_create' %}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-amber-50 transition-colors group">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:#faf0cc;">
+          <i data-lucide="user-plus" class="w-3.5 h-3.5" style="color:#a06e0c;"></i>
+        </div>
+        <span class="text-sm font-medium text-amber-800 group-hover:text-amber-950">Register New Member</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-amber-300 ml-auto"></i>
+      </a>
+      <a href="{% url 'followup_create' %}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-amber-50 transition-colors group">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-amber-100">
+          <i data-lucide="check-square" class="w-3.5 h-3.5 text-amber-600"></i>
+        </div>
+        <span class="text-sm font-medium text-amber-800 group-hover:text-amber-950">Assign Follow-Up</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-amber-300 ml-auto"></i>
+      </a>
+      <a href="{% url 'message_create' %}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-amber-50 transition-colors group">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-100">
+          <i data-lucide="send" class="w-3.5 h-3.5 text-indigo-600"></i>
+        </div>
+        <span class="text-sm font-medium text-amber-800 group-hover:text-amber-950">Send Message</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-amber-300 ml-auto"></i>
+      </a>
+      <a href="{% url 'prayer_create' %}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-amber-50 transition-colors group">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-pink-100">
+          <i data-lucide="heart" class="w-3.5 h-3.5 text-pink-600"></i>
+        </div>
+        <span class="text-sm font-medium text-amber-800 group-hover:text-amber-950">Log Prayer Request</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-amber-300 ml-auto"></i>
+      </a>
+      <a href="{% url 'attendance_create' %}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-amber-50 transition-colors group">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-green-100">
+          <i data-lucide="clipboard-list" class="w-3.5 h-3.5 text-green-600"></i>
+        </div>
+        <span class="text-sm font-medium text-amber-800 group-hover:text-amber-950">Record Attendance</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-amber-300 ml-auto"></i>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+  <!-- My Follow-Ups -->
+  <div class="card p-5">
+    <div class="flex items-center justify-between mb-4">
+      <h3 style="font-family:'Playfair Display',serif;" class="font-semibold text-amber-950">{% if role == 'assistant' %}My Follow-Ups{% else %}Recent Follow-Ups{% endif %}</h3>
+      <a href="{% url 'followup_list' %}" class="text-xs text-amber-600 font-semibold hover:text-amber-800">View all</a>
+    </div>
+    {% if my_followups %}
+    <div class="space-y-2">
+      {% for fu in my_followups %}
+      <div class="flex items-center gap-3 p-3 rounded-xl border border-amber-50 hover:border-amber-200 transition-colors">
+        <div class="avatar text-xs {% if fu.priority == 3 %}bg-red-100 text-red-700{% elif fu.priority == 2 %}bg-amber-100 text-amber-700{% else %}bg-gray-100 text-gray-600{% endif %}">
+          {{ fu.member.initials }}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-amber-900 truncate">{{ fu.member.get_full_name }}</p>
+          <p class="text-xs text-amber-500 flex items-center gap-1">
+            <i data-lucide="{% if fu.follow_up_type == 'call' %}phone{% elif fu.follow_up_type == 'email' %}mail{% elif fu.follow_up_type == 'sms' %}message-square{% else %}message-circle{% endif %}" class="w-3 h-3"></i>
+            {{ fu.get_follow_up_type_display }} &bull; Due {{ fu.due_date|date:"M d" }}
+          </p>
+        </div>
+        <span class="badge badge-{{ fu.status }}">{{ fu.get_status_display }}</span>
+        {% if fu.is_overdue %}<span class="text-xs text-red-500 font-bold">Overdue</span>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-8">
+      <i data-lucide="check-circle" class="w-10 h-10 text-green-200 mx-auto mb-2"></i>
+      <p class="text-sm text-amber-400">No pending follow-ups. Great work!</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Recent Members -->
+  <div class="card p-5">
+    <div class="flex items-center justify-between mb-4">
+      <h3 style="font-family:'Playfair Display',serif;" class="font-semibold text-amber-950">Recent Members</h3>
+      <a href="{% url 'member_list' %}" class="text-xs text-amber-600 font-semibold hover:text-amber-800">View all</a>
+    </div>
+    {% if recent_members %}
+    <div class="space-y-2">
+      {% for member in recent_members %}
+      <a href="{% url 'member_detail' member.pk %}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-amber-50 transition-colors group">
+        <div class="avatar text-xs bg-gradient-to-br from-amber-200 to-amber-400 text-amber-900 font-bold">{{ member.initials }}</div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-amber-900 group-hover:text-amber-600 truncate">{{ member.get_full_name }}</p>
+          <p class="text-xs text-amber-500">{{ member.phone|default:member.email|default:"No contact info" }}</p>
+        </div>
+        <span class="badge badge-{{ member.status }}">{{ member.get_status_display }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-sm text-amber-400 text-center py-8">No members yet. Add your first!</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

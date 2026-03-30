@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Add Staff — Grace Chapel{% endblock %}
+{% block page_title %}Add Staff Member{% endblock %}
+{% block page_subtitle %}Fill in the details below carefully{% endblock %}
+
+{% block content %}
+<div class="max-w-lg">
+  <div class="card p-6">
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+      <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">First Name <span class="text-red-400">*</span></label>
+          {{ form.first_name }}
+          {% if form.first_name.errors %}<p class="text-xs text-red-500 mt-1">{{ form.first_name.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="form-label">Last Name <span class="text-red-400">*</span></label>
+          {{ form.last_name }}
+          {% if form.last_name.errors %}<p class="text-xs text-red-500 mt-1">{{ form.last_name.errors.0 }}</p>{% endif %}
+        </div>
+      </div>
+
+      <div>
+        <label class="form-label">Username <span class="text-red-400">*</span></label>
+        {{ form.username }}
+        {% if form.username.errors %}<p class="text-xs text-red-500 mt-1">{{ form.username.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div>
+        <label class="form-label">Email</label>
+        {{ form.email }}
+        {% if form.email.errors %}<p class="text-xs text-red-500 mt-1">{{ form.email.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div>
+        <label class="form-label">Phone</label>
+        {{ form.phone }}
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">Role <span class="text-red-400">*</span></label>
+          {{ form.role }}
+          {% if form.role.errors %}<p class="text-xs text-red-500 mt-1">{{ form.role.errors.0 }}</p>{% endif %}
+          <p class="text-xs text-amber-600 mt-1">
+            <span class="font-medium">Section admin</span> — manages staff in their section.<br>
+            <span class="font-medium">Staff</span> — handles assigned members only.
+          </p>
+        </div>
+        <div>
+          <label class="form-label">Section <span class="text-red-400">*</span></label>
+          {{ form.section }}
+          {% if form.section.errors %}<p class="text-xs text-red-500 mt-1">{{ form.section.errors.0 }}</p>{% endif %}
+          <p class="text-xs text-amber-600 mt-1">
+            <span class="font-medium">Greeters</span> — welcome team.<br>
+            <span class="font-medium">Follow-up</span> — visitation &amp; first timers.
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <label class="form-label">Password <span class="text-red-400">*</span></label>
+        {{ form.password1 }}
+        {% if form.password1.errors %}<p class="text-xs text-red-500 mt-1">{{ form.password1.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div>
+        <label class="form-label">Confirm Password <span class="text-red-400">*</span></label>
+        {{ form.password2 }}
+        {% if form.password2.errors %}<p class="text-xs text-red-500 mt-1">{{ form.password2.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="btn-gold">
+          <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>Add Staff
+        </button>
+        <a href="{% url 'admin_staff' %}" class="btn-outline">Cancel</a>
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}

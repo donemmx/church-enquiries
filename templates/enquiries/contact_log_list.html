@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Contact Logs — Grace Chapel{% endblock %}
+{% block page_title %}Contact Logs{% endblock %}
+{% block page_subtitle %}All staff contact activity across members{% endblock %}
+
+{% block content %}
+
+<div class="card p-4 mb-5">
+  <form method="get" class="flex flex-wrap gap-3 items-end">
+    {% if can_see_all %}
+    <div class="w-40">
+      <label class="form-label">Section</label>
+      <select name="section" class="input-field">
+        <option value="">All Sections</option>
+        {% for val, label in section_choices %}
+        <option value="{{ val }}" {% if section_filter == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+    <div class="w-40">
+      <label class="form-label">Method</label>
+      <select name="method" class="input-field">
+        <option value="">All Methods</option>
+        {% for val, label in method_choices %}
+        <option value="{{ val }}" {% if method_filter == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% if is_section_admin %}
+    <div class="w-44">
+      <label class="form-label">Staff Member</label>
+      <select name="staff" class="input-field">
+        <option value="">All Staff</option>
+        {% for s in staff %}
+        <option value="{{ s.pk }}" {% if staff_filter == s.pk|stringformat:"s" %}selected{% endif %}>
+          {{ s.get_full_name|default:s.username }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+    <button type="submit" class="btn-gold">Filter</button>
+    {% if section_filter or method_filter or staff_filter %}
+    <a href="{% url 'contact_log_list' %}" class="btn-outline">Clear</a>
+    {% endif %}
+  </form>
+</div>
+
+<div class="card overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-amber-50" style="background:#fdfbf7;">
+          <th class="text-left px-5 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Member</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Logged By</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Method</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Outcome</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Date</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Notes</th>
+          <th class="text-right px-5 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-amber-50">
+        {% for log in logs %}
+        <tr class="table-row">
+
+          <td class="px-5 py-3.5">
+            <a href="{% url 'member_detail' log.member.pk %}" class="flex items-center gap-2 group">
+              <div class="avatar text-xs bg-amber-100 text-amber-800 font-bold">{{ log.member.initials }}</div>
+              <span class="font-semibold text-amber-900 group-hover:text-amber-600">{{ log.member.get_full_name }}</span>
+            </a>
+          </td>
+
+          <td class="px-4 py-3.5">
+            <div class="flex items-center gap-2">
+              <div class="avatar text-xs font-bold w-6 h-6 text-[10px]
+                {% if log.section == 'greeters' %}bg-teal-100 text-teal-800{% else %}bg-indigo-100 text-indigo-800{% endif %}">
+                {{ log.logged_by.first_name|slice:":1"|upper }}{{ log.logged_by.last_name|slice:":1"|upper }}
+              </div>
+              <div>
+                <p class="text-amber-800 text-xs font-medium">{{ log.logged_by.get_full_name }}</p>
+                <span class="text-[10px] font-semibold uppercase tracking-wide
+                  {% if log.section == 'greeters' %}text-teal-500{% else %}text-indigo-500{% endif %}">
+                  {{ log.get_section_display }}
+                </span>
+              </div>
+            </div>
+          </td>
+
+          <td class="px-4 py-3.5">
+            <div class="flex items-center gap-1.5 text-amber-700">
+              <i data-lucide="{% if log.method == 'call' %}phone{% elif log.method == 'sms' %}message-square{% elif log.method == 'email' %}mail{% elif log.method == 'visit' %}home{% elif log.method == 'whatsapp' %}message-circle{% else %}activity{% endif %}" class="w-3.5 h-3.5 text-amber-400"></i>
+              {{ log.get_method_display }}
+            </div>
+          </td>
+
+          <td class="px-4 py-3.5">
+            <span class="badge
+              {% if log.outcome == 'reached' %}bg-green-100 text-green-700
+              {% elif log.outcome == 'no_answer' %}bg-red-100 text-red-700
+              {% elif log.outcome == 'left_message' %}bg-blue-100 text-blue-700
+              {% elif log.outcome == 'visited' %}bg-purple-100 text-purple-700
+              {% else %}bg-gray-100 text-gray-600{% endif %}">
+              {{ log.get_outcome_display }}
+            </span>
+          </td>
+
+          <td class="px-4 py-3.5 text-amber-700">{{ log.contacted_on|date:"M d, Y" }}</td>
+
+          <td class="px-4 py-3.5 text-amber-500 text-xs max-w-xs truncate">
+            {{ log.notes|default:"—" }}
+          </td>
+
+          <td class="px-5 py-3.5 text-right">
+            {% if log.logged_by == request.user or is_section_admin %}
+            <form method="post" action="{% url 'contact_log_delete' log.pk %}" class="inline">
+              {% csrf_token %}
+              <button type="submit"
+                      onclick="return confirm('Delete this log entry?')"
+                      class="p-1.5 rounded-lg hover:bg-red-100 text-red-400 hover:text-red-800 transition-colors"
+                      title="Delete">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </form>
+            {% endif %}
+          </td>
+
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="px-5 py-12 text-center">
+          <i data-lucide="activity" class="w-12 h-12 text-amber-100 mx-auto mb-3"></i>
+          <p class="text-amber-400 font-medium">No contact logs yet</p>
+          <p class="text-amber-300 text-xs mt-1">Staff activity will appear here once members are contacted</p>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if logs.has_other_pages %}
+  <div class="px-5 py-4 border-t border-amber-50 flex items-center justify-between">
+    <p class="text-xs text-amber-400">Page {{ logs.number }} of {{ logs.paginator.num_pages }}</p>
+    <div class="flex gap-1">
+      {% if logs.has_previous %}<a href="?page={{ logs.previous_page_number }}" class="btn-outline py-1 px-3 text-xs">Prev</a>{% endif %}
+      {% if logs.has_next %}<a href="?page={{ logs.next_page_number }}" class="btn-outline py-1 px-3 text-xs">Next</a>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Confirm Action — Grace Chapel{% endblock %}
+{% block page_title %}Confirm Account Action{% endblock %}
+
+{% block content %}
+<div class="max-w-md">
+  <div class="card p-6 text-center">
+    <div class="w-14 h-14 rounded-full {% if staff_user.is_active %}bg-red-100{% else %}bg-green-100{% endif %} flex items-center justify-center mx-auto mb-4">
+      <i data-lucide="{% if staff_user.is_active %}user-x{% else %}user-check{% endif %}" class="w-6 h-6 {% if staff_user.is_active %}text-red-500{% else %}text-green-600{% endif %}"></i>
+    </div>
+    <h3 style="font-family:'Playfair Display',serif;" class="text-lg font-bold text-amber-950 mb-2">
+      {% if staff_user.is_active %}Deactivate Account?{% else %}Activate Account?{% endif %}
+    </h3>
+    <p class="text-sm text-amber-600 mb-6">
+      {% if staff_user.is_active %}
+        <strong>{{ staff_user.get_full_name }}</strong> will no longer be able to log in. Their data will be preserved.
+      {% else %}
+        <strong>{{ staff_user.get_full_name }}</strong> will be able to log in again.
+      {% endif %}
+    </p>
+    <form method="post" class="flex gap-3 justify-center">
+      {% csrf_token %}
+      <button type="submit" class="{% if staff_user.is_active %}btn-danger{% else %}btn-gold{% endif %}">
+        <i data-lucide="{% if staff_user.is_active %}user-x{% else %}user-check{% endif %}" class="w-3.5 h-3.5"></i>
+        Confirm
+      </button>
+      <a href="{% url 'admin_staff' %}" class="btn-outline">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

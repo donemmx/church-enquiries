@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Edit Staff — Grace Chapel{% endblock %}
+{% block page_title %}Edit Staff Member{% endblock %}
+{% block page_subtitle %}Update {{ staff_user.get_full_name }}'s details{% endblock %}
+
+{% block content %}
+<div class="max-w-lg">
+  <div class="card p-6">
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+      <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">First Name</label>
+          {{ form.first_name }}
+          {% if form.first_name.errors %}<p class="text-xs text-red-500 mt-1">{{ form.first_name.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="form-label">Last Name</label>
+          {{ form.last_name }}
+          {% if form.last_name.errors %}<p class="text-xs text-red-500 mt-1">{{ form.last_name.errors.0 }}</p>{% endif %}
+        </div>
+      </div>
+
+      <div>
+        <label class="form-label">Email</label>
+        {{ form.email }}
+        {% if form.email.errors %}<p class="text-xs text-red-500 mt-1">{{ form.email.errors.0 }}</p>{% endif %}
+      </div>
+
+      <div>
+        <label class="form-label">Phone</label>
+        {{ form.phone }}
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">Role</label>
+          {{ form.role }}
+          {% if form.role.errors %}<p class="text-xs text-red-500 mt-1">{{ form.role.errors.0 }}</p>{% endif %}
+          {% if form.role.field.disabled %}
+            <p class="text-xs text-amber-500 mt-1">Role locked — contact superuser to change.</p>
+          {% endif %}
+        </div>
+        <div>
+          <label class="form-label">Section</label>
+          {{ form.section }}
+          {% if form.section.errors %}<p class="text-xs text-red-500 mt-1">{{ form.section.errors.0 }}</p>{% endif %}
+          {% if form.section.field.disabled %}
+            <p class="text-xs text-amber-500 mt-1">Section locked to your section.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Current section/role summary badge -->
+      <div class="flex items-center gap-2 py-2">
+        <span class="text-xs px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 font-medium">
+          {{ profile.get_section_display }}
+        </span>
+        <span class="text-xs px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+          {{ profile.get_role_display }}
+        </span>
+      </div>
+
+      <div class="flex items-center gap-2 pt-1">
+        {{ form.is_active }}
+        <label for="{{ form.is_active.id_for_label }}" class="text-sm font-medium text-amber-800">
+          Account Active
+        </label>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="btn-gold">
+          <i data-lucide="save" class="w-3.5 h-3.5"></i>Save Changes
+        </button>
+        <a href="{% url 'admin_staff' %}" class="btn-outline">Cancel</a>
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}

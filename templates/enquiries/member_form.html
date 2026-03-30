@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — Grace Chapel{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Fill in the details below carefully{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl">
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+    <div class="mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+      {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="space-y-5">
+
+      <!-- Personal Info -->
+      <div class="card p-6">
+        <h3 style="font-family:'Playfair Display',serif;" class="font-semibold text-amber-950 mb-5 flex items-center gap-2">
+          <i data-lucide="user" class="w-4 h-4 text-amber-500"></i>Personal Information
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <!-- Date -->
+          <div class="md:col-span-2">
+            <label class="form-label">Date <span class="text-red-400">*</span></label>
+            {{ form.first_visit_date }}
+            {% if form.first_visit_date.errors %}
+              <p class="text-xs text-red-500 mt-1">{{ form.first_visit_date.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Surname -->
+          <div>
+            <label class="form-label">Surname <span class="text-red-400">*</span></label>
+            {{ form.last_name }}
+            {% if form.last_name.errors %}
+              <p class="text-xs text-red-500 mt-1">{{ form.last_name.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- First Name -->
+          <div>
+            <label class="form-label">First Name <span class="text-red-400">*</span></label>
+            {{ form.first_name }}
+            {% if form.first_name.errors %}
+              <p class="text-xs text-red-500 mt-1">{{ form.first_name.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Home Address -->
+          <div class="md:col-span-2">
+            <label class="form-label">Home Address</label>
+            {{ form.address }}
+            {% if form.address.errors %}
+              <p class="text-xs text-red-500 mt-1">{{ form.address.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Phone -->
+          <div>
+            <label class="form-label">Phone Number</label>
+            {{ form.phone }}
+            {% if form.phone.errors %}
+              <p class="text-xs text-red-500 mt-1">{{ form.phone.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label class="form-label">Email</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+              <p class="text-xs text-red-500 mt-1">{{ form.email.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Vocation Address -->
+          <div class="md:col-span-2">
+            <label class="form-label">Vocation / Work Address</label>
+            {{ form.vocation_address }}
+            {% if form.vocation_address.errors %}
+              <p class="text-xs text-red-500 mt-1">{{ form.vocation_address.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Gender -->
+          <div>
+            <label class="form-label">Gender</label>
+            {{ form.gender }}
+            {% if form.gender.errors %}
+              <p class="text-xs text-red-500 mt-1">{{ form.gender.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Age Bracket -->
+          <div>
+            <label class="form-label">Age Bracket</label>
+            {{ form.age_bracket }}
+            {% if form.age_bracket.errors %}
+              <p class="text-xs text-red-500 mt-1">{{ form.age_bracket.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Marital Status -->
+          <div>
+            <label class="form-label">Marital Status</label>
+            {{ form.marital_status }}
+            {% if form.marital_status.errors %}
+              <p class="text-xs text-red-500 mt-1">{{ form.marital_status.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Invited By -->
+          <div>
+            <label class="form-label">Invited By</label>
+            {{ form.invitee }}
+            {% if form.invitee.errors %}
+              <p class="text-xs text-red-500 mt-1">{{ form.invitee.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Church & Decision Info -->
+      <div class="card p-6">
+        <h3 style="font-family:'Playfair Display',serif;" class="font-semibold text-amber-950 mb-5 flex items-center gap-2">
+          <i data-lucide="church" class="w-4 h-4 text-amber-500"></i>Church &amp; Decision Information
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <!-- Born Again -->
+          <div>
+            <label class="form-label">Are you born again?</label>
+            {{ form.is_born_again }}
+            {% if form.is_born_again.errors %}
+              <p class="text-xs text-red-500 mt-1">{{ form.is_born_again.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Joining Church -->
+          <div>
+            <label class="form-label">Are you deciding to join the church?</label>
+            {{ form.joining_church }}
+            {% if form.joining_church.errors %}
+              <p class="text-xs text-red-500 mt-1">{{ form.joining_church.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Preferred Visit Time -->
+          <div class="md:col-span-2">
+            <label class="form-label">What day or time would you prefer we visit you?</label>
+            {{ form.preferred_visit_time }}
+            {% if form.preferred_visit_time.errors %}
+              <p class="text-xs text-red-500 mt-1">{{ form.preferred_visit_time.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Prayer Point -->
+          <div class="md:col-span-2">
+            <label class="form-label">Prayer Point</label>
+            {{ form.prayer_requests }}
+            {% if form.prayer_requests.errors %}
+              <p class="text-xs text-red-500 mt-1">{{ form.prayer_requests.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Observation -->
+          <div class="md:col-span-2">
+            <label class="form-label">
+              Observation
+              <span class="text-amber-400 text-xs font-normal ml-1">(Staff note)</span>
+            </label>
+            {{ form.observation }}
+            {% if form.observation.errors %}
+              <p class="text-xs text-red-500 mt-1">{{ form.observation.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Admin / System (collapsed by default) -->
+      <details class="card">
+        <summary class="p-6 cursor-pointer font-semibold text-amber-950 flex items-center gap-2 select-none"
+                 style="font-family:'Playfair Display',serif;">
+          <i data-lucide="settings" class="w-4 h-4 text-amber-500"></i>
+          System / Admin
+          <i data-lucide="chevron-down" class="w-4 h-4 ml-auto text-amber-400"></i>
+        </summary>
+        <div class="px-6 pb-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div>
+              <label class="form-label">Membership Status</label>
+              {{ form.status }}
+            </div>
+
+            <div>
+              <label class="form-label">Assigned Staff</label>
+              {{ form.assigned_to }}
+            </div>
+
+            <div>
+              <label class="form-label">How did they hear about us?</label>
+              {{ form.how_did_you_hear }}
+            </div>
+
+            <div>
+              <label class="form-label">Previous Church</label>
+              {{ form.previous_church }}
+            </div>
+
+            <div class="flex items-center gap-3 pt-2">
+              {{ form.is_baptized }}
+              <label for="{{ form.is_baptized.id_for_label }}" class="text-sm font-medium text-amber-800">
+                Is Baptized
+              </label>
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="form-label">Ministry Interests</label>
+              <div class="flex flex-wrap gap-2 mt-1">
+                {% for choice in form.interests %}
+                <label class="flex items-center gap-1.5 cursor-pointer px-3 py-1.5 rounded-xl border border-amber-200 hover:border-amber-400 hover:bg-amber-50 transition-colors text-sm">
+                  {{ choice.tag }} {{ choice.choice_label }}
+                </label>
+                {% endfor %}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </details>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-3">
+        <button type="submit" class="btn-gold">
+          <i data-lucide="save" class="w-3.5 h-3.5"></i>
+          {% if member %}Update Member{% else %}Register Member{% endif %}
+        </button>
+        <a href="{% if member %}{% url 'member_detail' member.pk %}{% else %}{% url 'member_list' %}{% endif %}"
+           class="btn-outline">Cancel</a>
+        {% if member %}
+        <a href="{% url 'member_delete' member.pk %}" class="btn-danger ml-auto">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>Delete
+        </a>
+        {% endif %}
+      </div>
+
+    </div>
+  </form>
+</div>
+{% endblock %}

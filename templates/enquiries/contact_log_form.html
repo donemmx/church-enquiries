@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — Grace Chapel{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Record an interaction or contact attempt with this member{% endblock %}
+
+{% block content %}
+<div class="max-w-xl">
+  <div class="card p-6">
+
+    {# Member summary strip #}
+    <div class="flex items-center gap-3 p-3 rounded-xl bg-amber-50 border border-amber-100 mb-5">
+      <div class="avatar text-sm bg-amber-200 text-amber-900 font-bold">{{ member.initials }}</div>
+      <div>
+        <p class="font-semibold text-amber-900 text-sm">{{ member.get_full_name }}</p>
+        <p class="text-xs text-amber-500">{{ member.phone|default:"No phone" }} · {{ member.get_status_display }}</p>
+      </div>
+    </div>
+
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">Contact Method <span class="text-red-400">*</span></label>
+          {{ form.method }}
+        </div>
+        <div>
+          <label class="form-label">Outcome <span class="text-red-400">*</span></label>
+          {{ form.outcome }}
+        </div>
+      </div>
+      <div>
+        <label class="form-label">Date of Contact <span class="text-red-400">*</span></label>
+        {{ form.contacted_on }}
+      </div>
+      <div>
+        <label class="form-label">Notes</label>
+        {{ form.notes }}
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="btn-gold">
+          <i data-lucide="save" class="w-3.5 h-3.5"></i>Save Log
+        </button>
+        <a href="{% url 'member_detail' member.pk %}" class="btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.querySelectorAll('select, input, textarea').forEach(el => {
+    if (!el.classList.contains('input-field')) el.classList.add('input-field');
+  });
+</script>
+{% endblock %}

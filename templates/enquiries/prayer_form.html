@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — Grace Chapel{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="max-w-xl">
+  <div class="card p-6">
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <div><label class="form-label">Member</label>{{ form.member }}</div>
+      <div><label class="form-label">Prayer Request <span class="text-red-400">*</span></label>{{ form.request }}</div>
+      <div><label class="form-label">Status</label>{{ form.status }}</div>
+      <div class="flex items-center gap-2">{{ form.is_anonymous }}<label class="text-sm font-medium text-amber-800">Keep anonymous</label></div>
+      {% if prayer %}<div><label class="form-label">Testimony (if answered)</label>{{ form.testimony }}</div>{% endif %}
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="btn-gold"><i data-lucide="save" class="w-3.5 h-3.5"></i>Save</button>
+        <a href="{% url 'prayer_list' %}" class="btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>document.querySelectorAll('select,input,textarea').forEach(el => { if (!el.classList.contains('input-field') && el.type !== 'checkbox') el.classList.add('input-field'); });</script>
+{% endblock %}
