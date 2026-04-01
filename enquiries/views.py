@@ -360,12 +360,6 @@ def member_delete(request, pk):
 
 @login_required
 def member_assign(request, pk):
-    """
-    POST-only. Assigns a member to a staff member within the correct section.
-    Greeters section  → sets greeter_assigned_to
-    Follow-up section → sets assigned_to
-    Superuser can pass assign_as='greeters' or assign_as='followup' to pick.
-    """
     if not is_section_admin(request.user):
         messages.error(request, 'Access denied.')
         return redirect('member_detail', pk=pk)
@@ -384,11 +378,35 @@ def member_assign(request, pk):
             member.assigned_to = staff_user
             label = 'Follow-up'
 
+            # Auto-create a FollowUp task if one doesn't already exist
+            from django.utils import timezone
+            from datetime import timedelta
+            existing = FollowUp.objects.filter(
+                member=member,
+                status__in=['pending', 'in_progress']
+            ).exists()
+
+            if not existing:
+                FollowUp.objects.create(
+                    member=member,
+                    assigned_to=staff_user,
+                    assigned_by=request.user,
+                    follow_up_type='call',
+                    status='pending',
+                    priority=2,
+                    due_date=timezone.now().date() + timedelta(days=3),
+                    notes='Auto-created on assignment.',
+                )
+
         member.save()
         messages.success(request, f'{member.get_full_name()} assigned to {staff_user.get_full_name()} ({label}).')
     else:
         messages.error(request, 'No staff member selected.')
 
+    # Redirect back to wherever the form was submitted from
+    next_url = request.POST.get('next', '')
+    if next_url == 'followup_list':
+        return redirect('followup_list')
     return redirect('member_detail', pk=pk)
 
 
@@ -433,31 +451,41 @@ def followup_list(request):
         messages.error(request, 'Follow-ups are managed by the Follow-Up section.')
         return redirect('dashboard')
 
-    qs            = followup_qs(request.user)
-    status_filter = request.GET.get('status', '')
-    type_filter   = request.GET.get('type', '')
+    # Query Members assigned for follow-up, not FollowUp records
+    qs = Member.objects.filter(is_active=True).select_related('assigned_to')
+
+    # Regular staff only see their own assigned members
+    if not can_see_all(request.user) and not is_section_admin(request.user):
+        qs = qs.filter(assigned_to=request.user)
+
+    search          = request.GET.get('search', '')
+    status_filter   = request.GET.get('status', '')
+    assigned_filter = request.GET.get('assigned', '')
+
+    if search:
+        qs = qs.filter(Q(first_name__icontains=search) | Q(last_name__icontains=search))
     if status_filter:
         qs = qs.filter(status=status_filter)
-    if type_filter:
-        qs = qs.filter(follow_up_type=type_filter)
+    if assigned_filter:
+        qs = qs.filter(assigned_to_id=assigned_filter)
 
-    qs      = qs.select_related('member', 'assigned_to', 'assigned_by')
-    today   = timezone.now().date()
-    overdue = qs.filter(status__in=['pending', 'in_progress'], due_date__lt=today).count()
+    unassigned_count = Member.objects.filter(is_active=True, assigned_to__isnull=True).count()
+    staff = User.objects.filter(is_active=True, profile__section__in=['followup', 'all'])
 
-    paginator  = Paginator(qs, 15)
-    follow_ups = paginator.get_page(request.GET.get('page'))
+    paginator = Paginator(qs, 15)
+    members   = paginator.get_page(request.GET.get('page'))
 
     context = {
-        'follow_ups':     follow_ups,
-        'status_filter':  status_filter,
-        'type_filter':    type_filter,
-        'overdue':        overdue,
-        'status_choices': FollowUp.STATUS_CHOICES,
-        'type_choices':   FollowUp.TYPE_CHOICES,
+        'members':          members,
+        'search':           search,
+        'status_filter':    status_filter,
+        'assigned_filter':  assigned_filter,
+        'staff':            staff,
+        'unassigned_count': unassigned_count,
+        'status_choices':   Member.STATUS_CHOICES,
+        'is_section_admin': is_section_admin(request.user),
     }
     return render(request, 'enquiries/followup_list.html', context)
-
 
 @login_required
 def followup_create(request, member_pk=None):
@@ -1128,3 +1156,68 @@ def contact_log_list(request):
         'can_see_all':     can_see_all(request.user),
         'section':         profile.section,
     })
+
+
+
+
+
+
+
+
+
+@login_required
+def followup_tasks(request):
+    if get_section(request.user) == 'greeters' and not can_see_all(request.user):
+        messages.error(request, 'Access denied.')
+        return redirect('dashboard')
+
+    qs = followup_qs(request.user).select_related('member', 'assigned_to')
+
+    search          = request.GET.get('search', '')
+    status_filter   = request.GET.get('status', '')
+    type_filter     = request.GET.get('type', '')
+    assigned_filter = request.GET.get('assigned', '')
+    priority_filter = request.GET.get('priority', '')
+
+    if search:
+        qs = qs.filter(
+            Q(member__first_name__icontains=search) |
+            Q(member__last_name__icontains=search)
+        )
+    if status_filter:
+        qs = qs.filter(status=status_filter)
+    if type_filter:
+        qs = qs.filter(follow_up_type=type_filter)
+    if assigned_filter:
+        qs = qs.filter(assigned_to_id=assigned_filter)
+    if priority_filter:
+        qs = qs.filter(priority=priority_filter)
+
+    today = timezone.now().date()
+
+    total_count     = qs.count()
+    pending_count   = qs.filter(status__in=['pending', 'in_progress']).count()
+    overdue_count   = qs.filter(status__in=['pending', 'in_progress'], due_date__lt=today).count()
+    completed_count = qs.filter(status='completed').count()
+
+    paginator  = Paginator(qs, 20)
+    follow_ups = paginator.get_page(request.GET.get('page'))
+    staff      = User.objects.filter(is_active=True, profile__section__in=['followup', 'all'])
+
+    context = {
+        'follow_ups':       follow_ups,
+        'search':           search,
+        'status_filter':    status_filter,
+        'type_filter':      type_filter,
+        'assigned_filter':  assigned_filter,
+        'priority_filter':  priority_filter,
+        'staff':            staff,
+        'total_count':      total_count,
+        'pending_count':    pending_count,
+        'overdue_count':    overdue_count,
+        'completed_count':  completed_count,
+        'status_choices':   FollowUp.STATUS_CHOICES,
+        'type_choices':     FollowUp.TYPE_CHOICES,
+        'is_section_admin': is_section_admin(request.user),
+    }
+    return render(request, 'enquiries/followup_tasks.html', context)

@@ -108,7 +108,6 @@
         <div class="flex-1 min-w-0">
           <p class="text-yellow-100 text-xs font-semibold truncate">{{ user.get_full_name|default:user.username }}</p>
           <div class="flex items-center gap-1 mt-0.5">
-            {# Role label #}
             {% if role == 'admin' %}
               <span class="text-yellow-500/70 text-xs">Administrator</span>
             {% elif role == 'section_admin' %}
@@ -116,7 +115,6 @@
             {% else %}
               <span class="text-yellow-500/70 text-xs">Staff</span>
             {% endif %}
-            {# Section pill #}
             {% if section == 'greeters' %}
               <span class="section-pill section-pill-greeters">Greeters</span>
             {% elif section == 'followup' %}
@@ -132,34 +130,35 @@
     <!-- Navigation -->
     <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
 
-      <!-- {# ────────────────────────────────────────
-         SUPERUSER / GLOBAL ADMIN — sees everything
-      ──────────────────────────────────────── #} -->
+      <!-- ────────────────────────────────────────
+           SUPERUSER / GLOBAL ADMIN
+      ──────────────────────────────────────── -->
       {% if is_super or role == 'admin' and section == 'all' %}
 
         <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Overview</p>
         <a href="{% url 'dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="layout-dashboard" class="w-4 h-4 flex-shrink-0"></i>Dashboard
         </a>
-        <a href="{% url 'member_list' %}" class="sidebar-link {% if 'member' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>Members
-        </a>
-        <!-- <a href="{% url 'followup_list' %}"
-          class="sidebar-link {% if request.resolver_match.url_name == 'followup_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="check-square" class="w-4 h-4 flex-shrink-0"></i>
-          Follow-Ups
-        </a> -->
-
-        <a href="{% url 'greeter_list' %}"
-          class="sidebar-link {% if request.resolver_match.url_name == 'greeter_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>
-          Greeters
+        <a href="{% url 'member_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'member_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>Members Database
         </a>
 
-        <a href="{% url 'integration_list' %}"
-          class="sidebar-link {% if request.resolver_match.url_name == 'integration_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="check-square" class="w-4 h-4 flex-shrink-0"></i>
-          Integrations
+        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">First Timers</p>
+        <a href="{% url 'followup_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'followup_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>Assignments
+        </a>
+        <a href="{% url 'followup_tasks' %}" class="sidebar-link {% if request.resolver_match.url_name == 'followup_tasks' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="clipboard-list" class="w-4 h-4 flex-shrink-0"></i>Tasks
+        </a>
+
+        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Greeters</p>
+        <a href="{% url 'greeter_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'greeter_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="hand" class="w-4 h-4 flex-shrink-0"></i>Assignments
+        </a>
+
+        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Records</p>
+        <a href="{% url 'integration_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'integration_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="check-square" class="w-4 h-4 flex-shrink-0"></i>Integrations
         </a>
         <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>Contact Logs
@@ -184,19 +183,17 @@
           <i data-lucide="bar-chart-2" class="w-4 h-4 flex-shrink-0"></i>Reports
         </a>
 
-      <!-- {# ────────────────────────────────────────
-         GREETERS — section admin
-      ──────────────────────────────────────── #} -->
+      <!-- ────────────────────────────────────────
+           GREETERS — section admin
+      ──────────────────────────────────────── -->
       {% elif section == 'greeters' and role == 'section_admin' %}
 
         <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Greeters</p>
-        <a href="{% url 'member_list' %}" class="sidebar-link {% if 'member' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>Members
+        <a href="{% url 'member_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'member_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>Members Database
         </a>
-        <a href="{% url 'greeter_list' %}"
-          class="sidebar-link {% if request.resolver_match.url_name == 'greeter_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>
-          Greeters
+        <a href="{% url 'greeter_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'greeter_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="hand" class="w-4 h-4 flex-shrink-0"></i>Assignments
         </a>
         <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>Contact Logs
@@ -204,9 +201,9 @@
         <a href="{% url 'prayer_list' %}" class="sidebar-link {% if 'prayer' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="heart" class="w-4 h-4 flex-shrink-0"></i>Prayer Requests
         </a>
-        <a href="{% url 'message_list' %}" class="sidebar-link {% if 'message' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        <!-- <a href="{% url 'message_list' %}" class="sidebar-link {% if 'message' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>Messages
-        </a>
+        </a> -->
 
         <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Admin</p>
         <a href="{% url 'admin_panel' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
@@ -219,19 +216,14 @@
           <i data-lucide="bar-chart-2" class="w-4 h-4 flex-shrink-0"></i>Reports
         </a>
 
-      <!-- {# ────────────────────────────────────────
-         GREETERS — regular staff
-      ──────────────────────────────────────── #} -->
+      <!-- ────────────────────────────────────────
+           GREETERS — regular staff
+      ──────────────────────────────────────── -->
       {% elif section == 'greeters' and role == 'staff' %}
 
         <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Greeters</p>
-        <!-- <a href="{% url 'member_list' %}" class="sidebar-link {% if 'member' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>My Members
-        </a> -->
-        <a href="{% url 'greeter_list' %}"
-          class="sidebar-link {% if request.resolver_match.url_name == 'greeter_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>
-          Greeters
+        <a href="{% url 'greeter_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'greeter_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="hand" class="w-4 h-4 flex-shrink-0"></i>My Assignments
         </a>
         <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>Contact Logs
@@ -240,27 +232,30 @@
           <i data-lucide="heart" class="w-4 h-4 flex-shrink-0"></i>Prayer Requests
         </a>
 
-      <!-- {# ────────────────────────────────────────
-         FOLLOW-UP — section admin
-      ──────────────────────────────────────── #} -->
+      <!-- ────────────────────────────────────────
+           FOLLOW-UP — section admin
+      ──────────────────────────────────────── -->
       {% elif section == 'followup' and role == 'section_admin' %}
 
-        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Follow-Up</p>
-        <a href="{% url 'member_list' %}" class="sidebar-link {% if 'member' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>Members
+        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">First Timers</p>
+        <a href="{% url 'member_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'member_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>Members Database
         </a>
-        <!-- <a href="{% url 'followup_list' %}" class="sidebar-link {% if 'followup' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="check-square" class="w-4 h-4 flex-shrink-0"></i>Follow-Ups
-        </a> -->
+        <a href="{% url 'followup_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'followup_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>Assignments
+        </a>
+        <a href="{% url 'followup_tasks' %}" class="sidebar-link {% if request.resolver_match.url_name == 'followup_tasks' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="clipboard-list" class="w-4 h-4 flex-shrink-0"></i>Tasks
+        </a>
         <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>Contact Logs
         </a>
         <a href="{% url 'prayer_list' %}" class="sidebar-link {% if 'prayer' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="heart" class="w-4 h-4 flex-shrink-0"></i>Prayer Requests
         </a>
-        <a href="{% url 'message_list' %}" class="sidebar-link {% if 'message' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        <!-- <a href="{% url 'message_list' %}" class="sidebar-link {% if 'message' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>Messages
-        </a>
+        </a> -->
 
         <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Admin</p>
         <a href="{% url 'admin_panel' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
@@ -273,31 +268,30 @@
           <i data-lucide="bar-chart-2" class="w-4 h-4 flex-shrink-0"></i>Reports
         </a>
 
-      <!-- {# ────────────────────────────────────────
-         FOLLOW-UP — regular staff
-      ──────────────────────────────────────── #} -->
+      <!-- ────────────────────────────────────────
+           FOLLOW-UP — regular staff
+      ──────────────────────────────────────── -->
       {% elif section == 'followup' and role == 'staff' %}
 
         <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Follow-Up</p>
-        <a href="{% url 'member_list' %}" class="sidebar-link {% if 'member' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>My Members
+        <a href="{% url 'followup_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'followup_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>My Assignments
+        </a>
+        <a href="{% url 'followup_tasks' %}" class="sidebar-link {% if request.resolver_match.url_name == 'followup_tasks' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="clipboard-list" class="w-4 h-4 flex-shrink-0"></i>My Tasks
         </a>
         <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>Contact Logs
         </a>
-        <!-- <a href="{% url 'followup_list' %}" class="sidebar-link {% if 'followup' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="check-square" class="w-4 h-4 flex-shrink-0"></i>My Follow-Ups
-        </a> -->
         <a href="{% url 'prayer_list' %}" class="sidebar-link {% if 'prayer' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="heart" class="w-4 h-4 flex-shrink-0"></i>Prayer Requests
         </a>
 
       {% endif %}
-      {# end role/section branching #}
 
     </nav>
 
-    <!-- Bottom: profile + logout (always visible) -->
+    <!-- Bottom: profile + logout -->
     <div class="px-3 pb-5 border-t border-white/10 pt-3 space-y-0.5">
       <a href="{% url 'profile' %}" class="sidebar-link flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
         <i data-lucide="user" class="w-4 h-4"></i>My Profile
@@ -320,7 +314,6 @@
       </div>
       <div class="flex items-center gap-2">
         {% block header_actions %}{% endblock %}
-        {# Only show New Member button to section admins and above — not plain staff #}
         {% if is_super or role == 'admin' or role == 'section_admin' %}
         <a href="{% url 'member_create' %}" class="btn-gold text-xs">
           <i data-lucide="plus" class="w-3.5 h-3.5"></i>New Member

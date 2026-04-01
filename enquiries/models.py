@@ -3,18 +3,6 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 
-# Replace your existing Member model with this updated version
-
-from django.db import models
-from django.contrib.auth.models import User
-from django.utils import timezone
-
-
-from django.db import models
-from django.contrib.auth.models import User
-from django.utils import timezone
-
-
 class Member(models.Model):
     # ================== CHOICES ==================
     GENDER_CHOICES = [('M', 'Male'), ('F', 'Female')]
@@ -218,9 +206,17 @@ class FollowUp(models.Model):
     def __str__(self):
         return f"Follow-up: {self.member} by {self.assigned_to}"
 
+    # @property
+    # def is_overdue(self):
+    #     return self.status != 'completed' and self.due_date < timezone.now().date()
+
     @property
     def is_overdue(self):
-        return self.status != 'completed' and self.due_date < timezone.now().date()
+        return (
+            self.status in ('pending', 'in_progress') and
+            self.due_date is not None and
+            self.due_date < timezone.now().date()
+        )
 
 
 class Event(models.Model):

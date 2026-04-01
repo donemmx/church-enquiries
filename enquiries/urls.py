@@ -21,6 +21,7 @@ urlpatterns = [
 
     # Follow-ups
     path('follow-ups/', views.followup_list, name='followup_list'),
+    path('follow-ups/tasks/', views.followup_tasks, name='followup_tasks'),
     path('follow-ups/new/', views.followup_create, name='followup_create'),
     path('follow-ups/new/<int:member_pk>/', views.followup_create, name='followup_create_for_member'),
     path('follow-ups/<int:pk>/edit/', views.followup_edit, name='followup_edit'),
@@ -73,4 +74,5 @@ urlpatterns = [
     path('members/<int:member_pk>/log-contact/',  views.contact_log_create, name='contact_log_create'),
     path('contact-logs/<int:pk>/delete/',         views.contact_log_delete,  name='contact_log_delete'),
     path('contact-logs/',                         views.contact_log_list,    name='contact_log_list'),
+    
 ]
