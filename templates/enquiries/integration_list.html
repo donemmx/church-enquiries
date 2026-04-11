@@ -1,15 +1,16 @@
 {% extends "base.html" %}
-{% block title %}Integration — Grace Chapel{% endblock %}
+{% block title %}Integration — MIV Ojoo{% endblock %}
 {% block page_title %}Integration Unit{% endblock %}
 {% block page_subtitle %}Track visitors who have become full church members{% endblock %}
 {% block header_actions %}
 <a href="{% url 'integration_create' %}" class="btn-gold text-xs">
-  <i data-lucide="user-check" class="w-3.5 h-3.5"></i>Mark as Integrated
+  <i data-lucide="user-check" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">Mark as Integrated</span>
 </a>
 {% endblock %}
 
 {% block content %}
 
+{# ── Candidates alert ── #}
 {% if candidates > 0 %}
 <div class="bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-5 flex items-center gap-3">
   <i data-lucide="users" class="w-4 h-4 text-green-600 flex-shrink-0"></i>
@@ -20,27 +21,9 @@
 </div>
 {% endif %}
 
-<div class="card p-4 mb-5">
-  <form method="get" class="flex flex-wrap gap-3 items-end">
-    {% comment %}
-    <div class="w-44">
-      <label class="form-label">Pathway</label>
-      <select name="pathway" class="input-field">
-        <!-- <option value="">All Pathways</option> -->
-        {% for val, label in pathway_choices %}
-        <option value="{{ val }}" {% if pathway_filter == val %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <button type="submit" class="btn-gold">Filter</button>
-    {% endcomment %}
-    {% if pathway_filter %}<a href="{% url 'integration_list' %}" class="btn-outline">Clear</a>{% endif %}
-  </form>
-</div>
-
-<div class="card overflow-hidden">
+<div class="card overflow-hidden hidden md:block">
   <div class="overflow-x-auto">
-    <table class="w-full text-sm">
+    <table class="w-full text-sm" style="min-width:620px;">
       <thead>
         <tr class="border-b border-amber-50" style="background:#fdfbf7;">
           <th class="text-left px-5 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Member</th>
@@ -60,28 +43,124 @@
               <span class="font-semibold text-amber-900 group-hover:text-amber-600">{{ record.member.get_full_name }}</span>
             </a>
           </td>
-          <td class="px-4 py-3.5 text-amber-700">{{ record.integrated_on|date:"M d, Y" }}</td>
+          <td class="px-4 py-3.5 text-amber-700 text-xs">{{ record.integrated_on|date:"M d, Y" }}</td>
           <td class="px-4 py-3.5">
             <span class="badge bg-green-100 text-green-700">{{ record.get_pathway_display }}</span>
           </td>
-          <td class="px-4 py-3.5 text-amber-700">{{ record.integrated_by.get_full_name|default:"—" }}</td>
+          <td class="px-4 py-3.5 text-amber-700 text-sm">{{ record.integrated_by.get_full_name|default:"—" }}</td>
           <td class="px-4 py-3.5 text-amber-500 text-xs max-w-xs truncate">{{ record.notes|default:"—" }}</td>
           <td class="px-5 py-3.5 text-right">
-            <a href="{% url 'integration_update' record.pk %}"
-               class="p-1.5 rounded-lg hover:bg-amber-100 text-amber-400 hover:text-amber-800 transition-colors">
+            <a href="{% url 'integration_update' record.pk %}" class="p-1.5 rounded-lg hover:bg-amber-100 text-amber-400 hover:text-amber-800 transition-colors" title="Edit">
               <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
             </a>
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="6" class="px-5 py-12 text-center">
-          <i data-lucide="user-check" class="w-12 h-12 text-green-100 mx-auto mb-3"></i>
-          <p class="text-amber-400 font-medium">No integration records yet</p>
-          <a href="{% url 'integration_create' %}" class="btn-gold mt-3 inline-flex">Record First Integration</a>
-        </td></tr>
+        <tr>
+          <td colspan="6" class="px-5 py-12 text-center">
+            <i data-lucide="user-check" class="w-12 h-12 text-green-100 mx-auto mb-3"></i>
+            <p class="text-amber-400 font-medium">No integration records yet</p>
+            <a href="{% url 'integration_create' %}" class="btn-gold mt-3 inline-flex text-xs">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>Record First Integration
+            </a>
+          </td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+
+  {% if integrations.has_other_pages %}
+  <div class="px-5 py-4 border-t border-amber-50 flex items-center justify-between">
+    <p class="text-xs text-amber-400">Page {{ integrations.number }} of {{ integrations.paginator.num_pages }}</p>
+    <div class="flex gap-1">
+      {% if integrations.has_previous %}<a href="?page={{ integrations.previous_page_number }}" class="btn-outline py-1 px-3 text-xs">Prev</a>{% endif %}
+      {% if integrations.has_next %}<a href="?page={{ integrations.next_page_number }}" class="btn-outline py-1 px-3 text-xs">Next</a>{% endif %}
+    </div>
+  </div>
+  {% endif %}
 </div>
+
+<div class="md:hidden space-y-3">
+  {% for record in integrations %}
+  <div class="card p-4">
+
+    {# Top: avatar + name + pathway badge #}
+    <div class="flex items-start justify-between gap-3 mb-3">
+      <a href="{% url 'member_detail' record.member.pk %}" class="flex items-center gap-2.5 min-w-0">
+        <div class="avatar text-xs bg-green-100 text-green-800 font-bold flex-shrink-0">{{ record.member.initials }}</div>
+        <div class="min-w-0">
+          <p class="font-semibold text-amber-900 text-sm truncate">{{ record.member.get_full_name }}</p>
+          <p class="text-xs text-amber-400">{{ record.member.phone|default:record.member.email|default:"No contact" }}</p>
+        </div>
+      </a>
+      <span class="badge bg-green-100 text-green-700 flex-shrink-0">{{ record.get_pathway_display }}</span>
+    </div>
+
+    {# Meta grid: date + recorded by #}
+    <div class="grid grid-cols-2 gap-2 mb-3 text-xs">
+      <div>
+        <p class="text-amber-400 font-medium uppercase tracking-wide mb-0.5" style="font-size:10px;">Integrated On</p>
+        <p class="text-amber-700 flex items-center gap-1">
+          <i data-lucide="calendar" class="w-3 h-3 text-green-500"></i>
+          {{ record.integrated_on|date:"M d, Y" }}
+        </p>
+      </div>
+      <div>
+        <p class="text-amber-400 font-medium uppercase tracking-wide mb-0.5" style="font-size:10px;">Recorded By</p>
+        <p class="text-amber-700 truncate">{{ record.integrated_by.get_full_name|default:"—" }}</p>
+      </div>
+    </div>
+
+    {# Notes — only shown if present #}
+    {% if record.notes %}
+    <div class="bg-amber-50 rounded-lg px-3 py-2 mb-3 text-xs text-amber-600">
+      <p class="flex items-start gap-1">
+        <i data-lucide="file-text" class="w-3 h-3 mt-0.5 text-amber-400 flex-shrink-0"></i>
+        <span>{{ record.notes }}</span>
+      </p>
+    </div>
+    {% endif %}
+
+    {# Action row #}
+    <div class="flex items-center gap-2 pt-2 border-t border-amber-50">
+      <a href="{% url 'member_detail' record.member.pk %}" class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-semibold transition-colors">
+        <i data-lucide="eye" class="w-3.5 h-3.5"></i>View Profile
+      </a>
+      <a href="{% url 'integration_update' record.pk %}" class="flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-green-50 hover:bg-green-100 text-green-700 text-xs font-semibold transition-colors">
+        <i data-lucide="pencil" class="w-3.5 h-3.5"></i>Edit
+      </a>
+    </div>
+
+  </div>
+  {% empty %}
+  <div class="card p-10 text-center">
+    <i data-lucide="user-check" class="w-12 h-12 text-green-100 mx-auto mb-3"></i>
+    <p class="text-amber-400 font-medium">No integration records yet</p>
+    <a href="{% url 'integration_create' %}" class="btn-gold mt-4 inline-flex text-xs">
+      <i data-lucide="plus" class="w-3.5 h-3.5"></i>Record First Integration
+    </a>
+  </div>
+  {% endfor %}
+
+  {# Mobile pagination #}
+  {% if integrations.has_other_pages %}
+  <div class="flex items-center justify-between pt-2">
+    <p class="text-xs text-amber-400">Page {{ integrations.number }} of {{ integrations.paginator.num_pages }}</p>
+    <div class="flex gap-2">
+      {% if integrations.has_previous %}
+      <a href="?page={{ integrations.previous_page_number }}" class="btn-outline py-1.5 px-3 text-xs">
+        <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>Prev
+      </a>
+      {% endif %}
+      {% if integrations.has_next %}
+      <a href="?page={{ integrations.next_page_number }}" class="btn-outline py-1.5 px-3 text-xs">
+        Next<i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
 {% endblock %}

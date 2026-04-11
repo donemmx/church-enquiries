@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Dashboard — Grace Chapel{% endblock %}
+{% block title %}Dashboard — MIV Ojoo{% endblock %}
 {% block page_title %}Dashboard{% endblock %}
 {% block page_subtitle %}Good to see you, {{ user.first_name|default:user.username }}! Here's what's happening today.{% endblock %}
 
 {% block content %}
 <!-- Stats Row -->
-<div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
   <div class="card p-5 relative overflow-hidden col-span-1">
     <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-10" style="background:#c98e10;"></div>
     <div class="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style="background:#faf0cc;">
@@ -142,7 +142,7 @@
   </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
   <!-- My Follow-Ups -->
   <div class="card p-5">
     <div class="flex items-center justify-between mb-4">
@@ -177,7 +177,7 @@
   </div>
 
   <!-- Recent Members -->
-  <div class="card p-5">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
     <div class="flex items-center justify-between mb-4">
       <h3 style="font-family:'Playfair Display',serif;" class="font-semibold text-amber-950">Recent Members</h3>
       <a href="{% url 'member_list' %}" class="text-xs text-amber-600 font-semibold hover:text-amber-800">View all</a>

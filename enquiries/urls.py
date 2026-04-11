@@ -67,12 +67,13 @@ urlpatterns = [
     path('integration/add/',             views.integration_create,   name='integration_create'),
     path('integration/add/<int:member_pk>/', views.integration_create, name='integration_create_for_member'),
     path('integration/<int:pk>/edit/',   views.integration_update,   name='integration_update'),
+    path('members/<int:member_pk>/quick-integrate/', views.integration_quick, name='integration_quick'),
 
 
 
     #Contact Logs
     path('members/<int:member_pk>/log-contact/',  views.contact_log_create, name='contact_log_create'),
     path('contact-logs/<int:pk>/delete/',         views.contact_log_delete,  name='contact_log_delete'),
-    path('contact-logs/',                         views.contact_log_list,    name='contact_log_list'),
+    # path('contact-logs/',                         views.contact_log_list,    name='contact_log_list'),
     
 ]

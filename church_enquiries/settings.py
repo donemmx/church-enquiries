@@ -101,5 +101,5 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # TERMII SMS SETTINGS
 TERMII_API_KEY = "TLSRFdFLVgifWBQwMrTdQzykLCqAGKKhTOObsuiGYYusaKQuCOjjLwccOJmATm"
-TERMII_SENDER_ID = "ParachICT"
+TERMII_SENDER_ID = "MIV Ojoo"
 TERMII_SMS_URL = "https://api.ng.termii.com/api/sms/send"

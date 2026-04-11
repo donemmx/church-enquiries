@@ -240,6 +240,17 @@ def member_list(request):
     status_filter   = request.GET.get('status', '')
     assigned_filter = request.GET.get('assigned', '')
 
+
+    date_from = request.GET.get('date_from', '')
+    date_to   = request.GET.get('date_to', '')
+
+    if date_from:
+        queryset = queryset.filter(first_visit_date__gte=date_from)
+
+    if date_to:
+        queryset = queryset.filter(first_visit_date__lte=date_to)
+
+
     if search:
         queryset = queryset.filter(
             Q(first_name__icontains=search) |
@@ -259,7 +270,10 @@ def member_list(request):
     members   = paginator.get_page(request.GET.get('page'))
     staff     = section_staff_qs(request.user)
 
+
     context = {
+        'date_from': date_from,
+        'date_to': date_to,
         'members':          members,
         'search':           search,
         'status_filter':    status_filter,
@@ -562,8 +576,32 @@ def followup_complete(request, pk):
         if outcome:
             followup.outcome = outcome
         followup.save()
-        messages.success(request, 'Follow-up marked as completed!')
-    return redirect('followup_list')
+
+        # Auto-create round 2 only if this was round 1 and round 2 doesn't exist yet
+        if followup.follow_up_round == 1:
+            already_has_round2 = FollowUp.objects.filter(
+                member=followup.member,
+                follow_up_round=2,
+            ).exists()
+            if not already_has_round2:
+                FollowUp.objects.create(
+                    member          = followup.member,
+                    assigned_to     = followup.assigned_to,
+                    assigned_by     = followup.assigned_by,
+                    follow_up_type  = followup.follow_up_type,
+                    status          = 'pending',
+                    priority        = followup.priority,
+                    follow_up_round = 2,
+                    due_date        = timezone.now().date() + timedelta(days=7),
+                    notes           = f'Auto-created: second follow-up for {followup.member.get_full_name()}.',
+                )
+                messages.success(request, 'Follow-up completed! A second follow-up has been scheduled for next week.')
+            else:
+                messages.success(request, 'Follow-up marked as completed!')
+        else:
+            messages.success(request, 'Follow-up marked as completed!')
+
+    return redirect('followup_tasks')
 
 
 # ─────────────────────────────────────────────
@@ -636,43 +674,103 @@ def message_list(request):
     return render(request, 'enquiries/message_list.html', context)
 
 
+from django.utils import timezone
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.conf import settings
+from django.core.mail import send_mail
+from django.contrib.auth.decorators import login_required
+
 @login_required
 def message_create(request):
+    staff = section_staff_qs(request.user)
+
     if request.method == 'POST':
         form = MessageForm(request.POST)
+
         if form.is_valid():
-            msg        = form.save(commit=False)
+            msg = form.save(commit=False)
             msg.sender = request.user
             msg.save()
             form.save_m2m()
-            action = request.POST.get('action', 'draft')
 
+            action = request.POST.get('action', 'draft')
+            send_to_all = request.POST.get('send_to_all') == 'on'
+
+            # 🔥 START WITH BASE QUERYSET
+            members = Member.objects.filter(is_active=True)
+
+            # 🔥 APPLY FILTERS ONLY IF NOT "SEND TO ALL"
+            if not send_to_all:
+                date_from = request.POST.get('date_from')
+                date_to = request.POST.get('date_to')
+
+                # If recipients manually selected → use them
+                if msg.recipients.exists():
+                    members = msg.recipients.all()
+                else:
+                    if date_from:
+                        members = members.filter(created_at__date__gte=date_from)
+
+                    if date_to:
+                        members = members.filter(created_at__date__lte=date_to)
+
+
+            # 🚀 ACTION HANDLING
             if action == 'send':
                 if msg.scheduled_at and msg.scheduled_at > timezone.now():
                     msg.status = 'scheduled'
-                    messages.success(request, f'Message "{msg.title}" scheduled for {msg.scheduled_at}.')
+                    messages.success(
+                        request,
+                        f'Message "{msg.title}" scheduled for {msg.scheduled_at}.'
+                    )
                 else:
-                    msg.status  = 'sent'
+                    msg.status = 'sent'
                     msg.sent_at = timezone.now()
-                    members     = Member.objects.filter(is_active=True) if msg.send_to_all else msg.recipients.all()
-                    total_sent  = 0
+
+                    total_sent = 0
+
                     for member in members:
                         if msg.message_type in ('email', 'both') and member.email:
-                            send_mail(msg.title, msg.body, settings.DEFAULT_FROM_EMAIL, [member.email], fail_silently=False)
+                            send_mail(
+                                msg.title,
+                                msg.body,
+                                settings.DEFAULT_FROM_EMAIL,
+                                [member.email],
+                                fail_silently=False
+                            )
+
                         if msg.message_type in ('sms', 'both') and member.phone:
                             send_sms(member.phone, msg.body)
+
                         total_sent += 1
+
                     msg.total_sent = total_sent
-                    messages.success(request, f'Message "{msg.title}" sent to {total_sent} recipients!')
+
+                    messages.success(
+                        request,
+                        f'Message "{msg.title}" sent to {total_sent} recipients!'
+                    )
+
             else:
                 msg.status = 'draft'
-                messages.success(request, f'Message "{msg.title}" saved as draft.')
+                messages.success(
+                    request,
+                    f'Message "{msg.title}" saved as draft.'
+                )
 
             msg.save()
             return redirect('message_list')
+
     else:
         form = MessageForm()
-    return render(request, 'enquiries/message_form.html', {'form': form, 'title': 'Compose Message'})
+
+    return render(request, 'enquiries/message_form.html', {
+        'form': form,
+        'title': 'Compose Message',
+        'staff': staff,
+        'status_choices': Member.STATUS_CHOICES,
+    })
 
 
 @login_required
@@ -1221,3 +1319,37 @@ def followup_tasks(request):
         'is_section_admin': is_section_admin(request.user),
     }
     return render(request, 'enquiries/followup_tasks.html', context)
+
+
+
+
+@login_required
+def integration_quick(request, member_pk):
+    """
+    One-click promote a member to 'integrated'.
+    Creates an Integration record and updates the member's status.
+    Redirects back to wherever the user came from.
+    """
+    if not can_see_all(request.user) and get_section(request.user) not in ('followup',):
+        messages.error(request, 'Access denied.')
+        return redirect('dashboard')
+
+    member = get_object_or_404(Member, pk=member_pk, is_active=True)
+
+    if request.method == 'POST':
+        if member.status != 'integrated':
+            # Only create a record if one doesn't already exist
+            if not Integration.objects.filter(member=member).exists():
+                Integration.objects.create(
+                    member=member,
+                    integrated_by=request.user,
+                    integrated_on=timezone.now().date(),
+                    pathway='general',   # sensible default — edit if you have a preferred one
+                )
+            member.status = 'integrated'
+            member.save()
+            messages.success(request, f'{member.get_full_name()} has been marked as integrated.')
+        else:
+            messages.info(request, f'{member.get_full_name()} is already integrated.')
+
+    return redirect(request.POST.get('next', 'member_list'))

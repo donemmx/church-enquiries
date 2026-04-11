@@ -9,9 +9,9 @@ class Member(models.Model):
 
     STATUS_CHOICES = [
         ('new', 'New Visitor'),
-        ('returning', 'Returning Visitor'),
-        ('regular', 'Regular Attendee'),
-        ('member', 'Full Member'),
+        # ('returning', 'Returning Visitor'),
+        # ('regular', 'Regular Attendee'),
+        # ('member', 'Full Member'),
         ('integrated', 'Integrated Member'),
         ('inactive', 'Inactive'),
     ]
@@ -199,6 +199,11 @@ class FollowUp(models.Model):
     priority = models.IntegerField(choices=[(1, 'Low'), (2, 'Medium'), (3, 'High')], default=2)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    follow_up_round = models.IntegerField(
+        default=1,
+        choices=[(1, 'First Follow-Up'), (2, 'Second Follow-Up')],
+        help_text="Which follow-up round this is"
+    )
 
     class Meta:
         ordering = ['-priority', 'due_date']

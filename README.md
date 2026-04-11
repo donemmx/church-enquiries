@@ -1,4 +1,4 @@
-# ✝ Grace Chapel — Enquiries Management System
+# ✝ MIV Ojoo — Enquiries Management System
 
 A beautiful, full-featured Django web application for managing church enquiries, member follow-ups, messages, events, prayer requests, and more.
 
@@ -154,7 +154,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'your-email@gmail.com'
 EMAIL_HOST_PASSWORD = 'your-app-password'
-DEFAULT_FROM_EMAIL = 'Grace Chapel <your-email@gmail.com>'
+DEFAULT_FROM_EMAIL = 'MIV Ojoo <your-email@gmail.com>'
 ```
 
 ---

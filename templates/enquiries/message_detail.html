@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ msg.title }} — Grace Chapel{% endblock %}
+{% block title %}{{ msg.title }} — MIV Ojoo{% endblock %}
 {% block page_title %}{{ msg.title }}{% endblock %}
 {% block content %}
 <div class="max-w-2xl">
@@ -25,9 +25,7 @@
     <h3 style="font-family:'Playfair Display',serif;" class="font-semibold text-amber-950">
       Contact History
     </h3>
-    <a href="{% url 'contact_log_create' member.pk %}" class="btn-gold text-xs">
-      <i data-lucide="plus" class="w-3.5 h-3.5"></i>Log Contact
-    </a>
+    
   </div>
 
   {% if contact_logs %}
@@ -86,9 +84,7 @@
   <div class="text-center py-8">
     <i data-lucide="activity" class="w-10 h-10 text-amber-100 mx-auto mb-2"></i>
     <p class="text-amber-400 text-sm">No contact history yet</p>
-    <a href="{% url 'contact_log_create' member.pk %}" class="btn-gold mt-3 inline-flex text-xs">
-      <i data-lucide="plus" class="w-3.5 h-3.5"></i>Log First Contact
-    </a>
+    
   </div>
   {% endif %}
 </div>

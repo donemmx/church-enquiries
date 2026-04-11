@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Events — Grace Chapel{% endblock %}
+{% block title %}Events — MIV Ojoo{% endblock %}
 {% block page_title %}Events{% endblock %}
 {% block page_subtitle %}Manage church events and programs{% endblock %}
 {% block header_actions %}
@@ -39,7 +39,7 @@
 {% if past %}
 <h3 style="font-family:'Playfair Display',serif;" class="font-semibold text-amber-800 mb-3">Past Events</h3>
 <div class="card overflow-hidden">
-  <table class="w-full text-sm">
+  <table class="w-full text-sm" style="min-width:600px;">
     <tbody class="divide-y divide-amber-50">
       {% for event in past %}
       <tr class="table-row">

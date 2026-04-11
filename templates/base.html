@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Parach Chapel — Enquiries{% endblock %}</title>
+    <title>{% block title %}MIV Ojoo — Enquiries{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
@@ -67,6 +67,17 @@
       .section-pill-greeters { background: rgba(29,158,117,0.18); color: #9FE1CB; }
       .section-pill-followup  { background: rgba(186,117,23,0.2);  color: #FAC775; }
       .section-pill-all       { background: rgba(127,119,221,0.2); color: #CECBF6; }
+
+      /* ── RESPONSIVE ── */
+#sidebar { transition: transform 0.25s ease; }
+#overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 25; }
+@media (max-width: 768px) {
+  #sidebar { transform: translateX(-100%); position: fixed; z-index: 30; }
+  #sidebar.open { transform: translateX(0); }
+  #overlay.show { display: block; }
+  #main-content { margin-left: 0 !important; }
+}
+.overflow-x-auto { -webkit-overflow-scrolling: touch; }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
@@ -84,7 +95,7 @@
   <!-- ═══════════════════════════════════════════
        SIDEBAR
   ═══════════════════════════════════════════ -->
-  <aside class="sidebar w-64 flex-shrink-0 fixed top-0 left-0 h-full z-30 flex flex-col overflow-y-auto">
+  <aside id="sidebar" class="sidebar w-64 flex-shrink-0 fixed top-0 left-0 h-full z-30 flex flex-col overflow-y-auto">
 
     <!-- Brand -->
     <div class="px-5 py-6 border-b border-white/10">
@@ -93,7 +104,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
         </div>
         <div>
-          <p style="font-family:'Playfair Display',serif;" class="text-yellow-100 font-semibold text-sm">Parach Chapel</p>
+          <p style="font-family:'Playfair Display',serif;" class="text-yellow-100 font-semibold text-sm">MIV Ojoo</p>
           <p class="text-yellow-500/60 text-xs">Enquiries Portal</p>
         </div>
       </div>
@@ -140,10 +151,10 @@
           <i data-lucide="layout-dashboard" class="w-4 h-4 flex-shrink-0"></i>Dashboard
         </a>
         <a href="{% url 'member_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'member_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>Members Database
+          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>First Timers List
         </a>
 
-        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">First Timers</p>
+        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Follow Up</p>
         <a href="{% url 'followup_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'followup_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>Assignments
         </a>
@@ -160,17 +171,21 @@
         <a href="{% url 'integration_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'integration_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="check-square" class="w-4 h-4 flex-shrink-0"></i>Integrations
         </a>
-        <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        {% comment %}
+        <!-- <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>Contact Logs
-        </a>
+        </a> -->
+
+        <!-- <a href="{% url 'prayer_list' %}" class="sidebar-link {% if 'prayer' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+          <i data-lucide="heart" class="w-4 h-4 flex-shrink-0"></i>Prayer Requests
+        </a> -->
+        {% endcomment %}
 
         <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Communication</p>
         <a href="{% url 'message_list' %}" class="sidebar-link {% if 'message' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>Messages
         </a>
-        <a href="{% url 'prayer_list' %}" class="sidebar-link {% if 'prayer' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="heart" class="w-4 h-4 flex-shrink-0"></i>Prayer Requests
-        </a>
+        
 
         <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Admin</p>
         <a href="{% url 'admin_panel' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
@@ -190,11 +205,13 @@
 
         <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Greeters</p>
         <a href="{% url 'member_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'member_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>Members Database
+          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>First Timers List
         </a>
         <a href="{% url 'greeter_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'greeter_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="hand" class="w-4 h-4 flex-shrink-0"></i>Assignments
         </a>
+
+        {% comment %}
         <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>Contact Logs
         </a>
@@ -204,6 +221,7 @@
         <!-- <a href="{% url 'message_list' %}" class="sidebar-link {% if 'message' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>Messages
         </a> -->
+        {% endcomment %}
 
         <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Admin</p>
         <a href="{% url 'admin_panel' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
@@ -225,12 +243,14 @@
         <a href="{% url 'greeter_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'greeter_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="hand" class="w-4 h-4 flex-shrink-0"></i>My Assignments
         </a>
+        {% comment %}
         <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>Contact Logs
         </a>
         <a href="{% url 'prayer_list' %}" class="sidebar-link {% if 'prayer' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="heart" class="w-4 h-4 flex-shrink-0"></i>Prayer Requests
         </a>
+        {% endcomment %}
 
       <!-- ────────────────────────────────────────
            FOLLOW-UP — section admin
@@ -239,7 +259,7 @@
 
         <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">First Timers</p>
         <a href="{% url 'member_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'member_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>Members Database
+          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>First Timers List
         </a>
         <a href="{% url 'followup_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'followup_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>Assignments
@@ -247,6 +267,7 @@
         <a href="{% url 'followup_tasks' %}" class="sidebar-link {% if request.resolver_match.url_name == 'followup_tasks' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="clipboard-list" class="w-4 h-4 flex-shrink-0"></i>Tasks
         </a>
+        {% comment %}
         <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>Contact Logs
         </a>
@@ -256,6 +277,7 @@
         <!-- <a href="{% url 'message_list' %}" class="sidebar-link {% if 'message' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>Messages
         </a> -->
+        {% endcomment %}
 
         <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Admin</p>
         <a href="{% url 'admin_panel' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
@@ -280,12 +302,14 @@
         <a href="{% url 'followup_tasks' %}" class="sidebar-link {% if request.resolver_match.url_name == 'followup_tasks' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="clipboard-list" class="w-4 h-4 flex-shrink-0"></i>My Tasks
         </a>
+        {% comment %}
         <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>Contact Logs
         </a>
         <a href="{% url 'prayer_list' %}" class="sidebar-link {% if 'prayer' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
           <i data-lucide="heart" class="w-4 h-4 flex-shrink-0"></i>Prayer Requests
         </a>
+        {% endcomment %}
 
       {% endif %}
 
@@ -305,22 +329,30 @@
   <!-- ═══════════════════════════════════════════
        MAIN CONTENT
   ═══════════════════════════════════════════ -->
-  <main class="flex-1 flex flex-col min-h-screen" style="margin-left:256px;">
+  <div id="overlay" onclick="closeSidebar()"></div>
 
-    <header class="sticky top-0 z-20 bg-white/85 backdrop-blur-md border-b border-amber-100 px-6 py-3.5 flex items-center justify-between">
-      <div>
-        <h2 style="font-family:'Playfair Display',serif;" class="text-lg font-semibold text-amber-950">{% block page_title %}{% endblock %}</h2>
-        <p class="text-xs text-amber-700/50 mt-0.5">{% block page_subtitle %}{% endblock %}</p>
-      </div>
-      <div class="flex items-center gap-2">
-        {% block header_actions %}{% endblock %}
-        {% if is_super or role == 'admin' or role == 'section_admin' %}
-        <a href="{% url 'member_create' %}" class="btn-gold text-xs">
-          <i data-lucide="plus" class="w-3.5 h-3.5"></i>New Member
-        </a>
-        {% endif %}
-      </div>
-    </header>
+<main id="main-content" class="flex-1 flex flex-col min-h-screen" style="margin-left:256px;">
+
+  <header class="sticky top-0 z-20 bg-white/85 backdrop-blur-md border-b border-amber-100 px-4 py-3.5 flex items-center justify-between gap-2">
+    
+    <!-- Hamburger — mobile only -->
+    <button onclick="openSidebar()" class="md:hidden flex-shrink-0 p-2 rounded-lg hover:bg-amber-50 text-amber-700">
+      <i data-lucide="menu" class="w-5 h-5"></i>
+    </button>
+
+    <div class="flex-1 min-w-0">
+      <h2 style="font-family:'Playfair Display',serif;" class="text-base md:text-lg font-semibold text-amber-950 truncate">{% block page_title %}{% endblock %}</h2>
+      <p class="text-xs text-amber-700/50 mt-0.5 hidden sm:block">{% block page_subtitle %}{% endblock %}</p>
+    </div>
+    <div class="flex items-center gap-2 flex-shrink-0">
+      {% block header_actions %}{% endblock %}
+      {% if is_super or role == 'admin' or role == 'section_admin' %}
+      <a href="{% url 'member_create' %}" class="btn-gold text-xs">
+        <i data-lucide="plus" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">New Member</span>
+      </a>
+      {% endif %}
+    </div>
+  </header>
 
     <div class="flex-1 p-6 fade-up">
       {% if messages %}
@@ -339,7 +371,7 @@
     </div>
 
     <footer class="py-3 px-6 text-center text-xs text-amber-400/60 border-t border-amber-50 bg-white/40">
-      &copy; {% now "Y" %} Parach Chapel Enquiries Portal &mdash; Serving with Excellence
+      &copy; {% now "Y" %} MIV Ojoo Enquiries Portal &mdash; Serving with Excellence
     </footer>
   </main>
 
@@ -351,7 +383,23 @@
 {% block auth_content %}{% endblock %}
 {% endif %}
 
-<script>lucide.createIcons();</script>
+<script>
+  function openSidebar() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('overlay').classList.add('show');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+  }
+  // Close sidebar on nav link click (mobile)
+  document.querySelectorAll('#sidebar a').forEach(a => {
+    a.addEventListener('click', () => {
+      if (window.innerWidth < 768) closeSidebar();
+    });
+  });
+  lucide.createIcons();
+</script>
 {% block extra_scripts %}{% endblock %}
 </body>
 </html>

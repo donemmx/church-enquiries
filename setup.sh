@@ -1,8 +1,8 @@
 #!/bin/bash
-# Grace Chapel Enquiries System - Setup Script
+# MIV Ojoo Enquiries System - Setup Script
 
 echo ""
-echo "  ✝  Grace Chapel Enquiries System Setup"
+echo "  ✝  MIV Ojoo Enquiries System Setup"
 echo "  ========================================"
 echo ""
 

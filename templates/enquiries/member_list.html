@@ -1,61 +1,82 @@
 {% extends "base.html" %}
-{% block title %}Members — Grace Chapel{% endblock %}
+{% block title %}Members — MIV Ojoo{% endblock %}
 {% block page_title %}Members{% endblock %}
 {% block page_subtitle %}{{ total_count }} active member{{ total_count|pluralize }} in the database{% endblock %}
 
 {% block content %}
 
-{# Resolve section/role once for this template #}
 {% with profile=request.user.profile section=request.user.profile.section role=request.user.profile.role %}
 {% with is_super=request.user.is_superuser %}
 
-<!-- Filters -->
+{# ── Filters ── #}
 <div class="card p-4 mb-5">
-  <form method="get" class="flex flex-wrap gap-3 items-end">
-    <div class="flex-1 min-w-48">
-      <label class="form-label">Search</label>
-      <div class="relative">
-        <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-amber-400"></i>
-        <input type="text" name="search" value="{{ search }}" placeholder="Name, email, or phone..." class="input-field pl-9">
+  <form method="get">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mb-3">
+
+      <div class="sm:col-span-2 lg:col-span-1">
+        <label class="form-label">Search</label>
+        <div class="relative">
+          <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-amber-400"></i>
+          <input type="text" name="search" value="{{ search }}" placeholder="Name, email, or phone..." class="input-field pl-9">
+        </div>
       </div>
+
+      <div>
+        <label class="form-label">Status</label>
+        <select name="status" class="input-field">
+          <option value="">All Statuses</option>
+          {% for val, label in status_choices %}
+            <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label class="form-label">{% if section == 'greeters' %}Greeter{% else %}Assigned To{% endif %}</label>
+        <select name="assigned" class="input-field">
+          <option value="">Anyone</option>
+          {% for s in staff %}
+            <option value="{{ s.pk }}" {% if assigned_filter == s.pk|stringformat:"s" %}selected{% endif %}>
+              {{ s.get_full_name|default:s.username }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label class="form-label">Registered From</label>
+        <div class="relative">
+          <i data-lucide="calendar" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-amber-400 pointer-events-none"></i>
+          <input type="date" name="date_from" value="{{ date_from }}" class="input-field pl-9">
+        </div>
+      </div>
+
+      <div>
+        <label class="form-label">Registered To</label>
+        <div class="relative">
+          <i data-lucide="calendar" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-amber-400 pointer-events-none"></i>
+          <input type="date" name="date_to" value="{{ date_to }}" class="input-field pl-9">
+        </div>
+      </div>
+
     </div>
-    <div class="w-40">
-      <label class="form-label">Status</label>
-      <select name="status" class="input-field">
-        <option value="">All Statuses</option>
-        {% for val, label in status_choices %}
-          <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-      </select>
+    <div class="flex gap-2">
+      <button type="submit" class="btn-gold text-xs">
+        <i data-lucide="filter" class="w-3.5 h-3.5"></i>Filter
+      </button>
+      {% if search or status_filter or assigned_filter or date_from or date_to %}
+      <a href="{% url 'member_list' %}" class="btn-outline text-xs">
+        <i data-lucide="x" class="w-3.5 h-3.5"></i>Clear
+      </a>
+      {% endif %}
     </div>
-    <div class="w-44">
-      <label class="form-label">
-        {% if section == 'greeters' %}Greeter{% else %}Assigned To{% endif %}
-      </label>
-      <select name="assigned" class="input-field">
-        <option value="">Anyone</option>
-        {% for s in staff %}
-          <option value="{{ s.pk }}" {% if assigned_filter == s.pk|stringformat:"s" %}selected{% endif %}>
-            {{ s.get_full_name|default:s.username }}
-          </option>
-        {% endfor %}
-      </select>
-    </div>
-    <button type="submit" class="btn-gold">
-      <i data-lucide="filter" class="w-3.5 h-3.5"></i>Filter
-    </button>
-    {% if search or status_filter or assigned_filter %}
-    <a href="{% url 'member_list' %}" class="btn-outline">
-      <i data-lucide="x" class="w-3.5 h-3.5"></i>Clear
-    </a>
-    {% endif %}
   </form>
 </div>
 
-<!-- Member Table -->
-<div class="card overflow-hidden">
+
+<div class="card overflow-hidden hidden md:block">
   <div class="overflow-x-auto">
-    <table class="w-full text-sm">
+    <table class="w-full text-sm" style="min-width:680px;">
       <thead>
         <tr class="border-b border-amber-50" style="background:#fdfbf7;">
           <th class="text-left px-5 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Member</th>
@@ -75,80 +96,51 @@
         {% for member in members %}
         <tr class="table-row">
 
-          <!-- Name + initials -->
           <td class="px-5 py-3.5">
             <div class="flex items-center gap-3">
-              <div class="avatar text-xs bg-gradient-to-br from-amber-200 to-amber-400 text-amber-900 font-bold">
-                {{ member.initials }}
-              </div>
+              <div class="avatar text-xs bg-gradient-to-br from-amber-200 to-amber-400 text-amber-900 font-bold">{{ member.initials }}</div>
               <div>
-                <a href="{% url 'member_detail' member.pk %}" class="font-semibold text-amber-900 hover:text-amber-600 transition-colors">
-                  {{ member.get_full_name }}
-                </a>
-                {% if member.is_baptized %}
-                  <span class="ml-1 text-xs text-blue-600">✓ Baptized</span>
-                {% endif %}
+                <a href="{% url 'member_detail' member.pk %}" class="font-semibold text-amber-900 hover:text-amber-600 transition-colors">{{ member.get_full_name }}</a>
+                {% if member.is_baptized %}<span class="ml-1 text-xs text-blue-600">✓ Baptized</span>{% endif %}
               </div>
             </div>
           </td>
 
-          <!-- Contact -->
           <td class="px-4 py-3.5">
             <p class="text-amber-700">{{ member.phone|default:"—" }}</p>
             <p class="text-amber-400 text-xs">{{ member.email|default:"" }}</p>
           </td>
 
-          <!-- Status badge -->
           <td class="px-4 py-3.5">
             <span class="badge badge-{{ member.status }}">{{ member.get_status_display }}</span>
           </td>
 
-          <!-- First visit -->
-          <td class="px-4 py-3.5 text-amber-600">
-            {{ member.first_visit_date|date:"M d, Y" }}
-          </td>
+          <td class="px-4 py-3.5 text-amber-600 text-xs">{{ member.first_visit_date|date:"M d, Y" }}</td>
 
-          <!-- Assigned to — section-aware display -->
           <td class="px-4 py-3.5">
             {% if section == 'greeters' %}
-              {% if member.greeter_assigned_to %}
-                <span class="text-amber-700 text-sm">{{ member.greeter_assigned_to.get_full_name }}</span>
-              {% else %}
-                <span class="text-amber-300 text-xs italic">Unassigned</span>
-              {% endif %}
+              {% if member.greeter_assigned_to %}<span class="text-amber-700 text-sm">{{ member.greeter_assigned_to.get_full_name }}</span>
+              {% else %}<span class="text-amber-300 text-xs italic">Unassigned</span>{% endif %}
             {% elif section == 'followup' %}
-              {% if member.assigned_to %}
-                <span class="text-amber-700 text-sm">{{ member.assigned_to.get_full_name }}</span>
-              {% else %}
-                <span class="text-amber-300 text-xs italic">Unassigned</span>
-              {% endif %}
+              {% if member.assigned_to %}<span class="text-amber-700 text-sm">{{ member.assigned_to.get_full_name }}</span>
+              {% else %}<span class="text-amber-300 text-xs italic">Unassigned</span>{% endif %}
             {% else %}
-              {# Superuser / all: show both #}
-              {% if member.greeter_assigned_to %}
-                <p class="text-amber-700 text-xs"><span class="font-medium">G:</span> {{ member.greeter_assigned_to.get_full_name }}</p>
-              {% endif %}
-              {% if member.assigned_to %}
-                <p class="text-amber-700 text-xs"><span class="font-medium">F:</span> {{ member.assigned_to.get_full_name }}</p>
-              {% endif %}
-              {% if not member.greeter_assigned_to and not member.assigned_to %}
-                <span class="text-amber-300 text-xs italic">Unassigned</span>
-              {% endif %}
+              {% if member.greeter_assigned_to %}<p class="text-amber-700 text-xs"><span class="font-medium">G:</span> {{ member.greeter_assigned_to.get_full_name }}</p>{% endif %}
+              {% if member.assigned_to %}<p class="text-amber-700 text-xs"><span class="font-medium">F:</span> {{ member.assigned_to.get_full_name }}</p>{% endif %}
+              {% if not member.greeter_assigned_to and not member.assigned_to %}<span class="text-amber-300 text-xs italic">Unassigned</span>{% endif %}
             {% endif %}
           </td>
 
-          <!-- Quick Assign (section admins + superuser only) -->
           {% if is_super or role == 'section_admin' or role == 'admin' %}
           <td class="px-4 py-3.5">
             <form method="post" action="{% url 'member_assign' member.pk %}" class="flex items-center gap-1.5">
               {% csrf_token %}
-              {# For superuser show a section toggle, for section admins it's implicit #}
               {% if is_super or role == 'admin' and section == 'all' %}
                 <select name="assign_as" class="input-field py-1 text-xs w-24">
                   <option value="greeters">Greeter</option>
                   <option value="followup">Follow-up</option>
                 </select>
               {% else %}
-                {# Hidden — section is implicit from the user's own section #}
                 <input type="hidden" name="assign_as" value="{{ section }}">
               {% endif %}
               <select name="staff_id" class="input-field py-1 text-xs flex-1 min-w-0">
@@ -168,54 +160,48 @@
           </td>
           {% endif %}
 
-          <!-- Row actions -->
           <td class="px-5 py-3.5 text-right">
             <div class="flex items-center justify-end gap-1">
-
-              <a href="{% url 'member_detail' member.pk %}"
-                 class="p-1.5 rounded-lg hover:bg-amber-100 text-amber-500 hover:text-amber-800 transition-colors"
-                 title="View">
+              <a href="{% url 'member_detail' member.pk %}" class="p-1.5 rounded-lg hover:bg-amber-100 text-amber-500 hover:text-amber-800 transition-colors" title="View">
                 <i data-lucide="eye" class="w-3.5 h-3.5"></i>
               </a>
-
               {% if is_super or role == 'section_admin' or role == 'admin' %}
-              <a href="{% url 'member_edit' member.pk %}"
-                 class="p-1.5 rounded-lg hover:bg-amber-100 text-amber-500 hover:text-amber-800 transition-colors"
-                 title="Edit">
+              <a href="{% url 'member_edit' member.pk %}" class="p-1.5 rounded-lg hover:bg-amber-100 text-amber-500 hover:text-amber-800 transition-colors" title="Edit">
                 <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
               </a>
               {% endif %}
-
-              {# Follow-up action — followup section and above only #}
               {% if is_super or role == 'admin' or section == 'followup' %}
-              <a href="{% url 'followup_create_for_member' member.pk %}"
-                 class="p-1.5 rounded-lg hover:bg-green-100 text-green-500 hover:text-green-800 transition-colors"
-                 title="Add Follow-Up">
+              <a href="{% url 'followup_create_for_member' member.pk %}" class="p-1.5 rounded-lg hover:bg-green-100 text-green-500 hover:text-green-800 transition-colors" title="Add Follow-Up">
                 <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
               </a>
               {% endif %}
-
-              {# Delete — section admins and above only #}
+              {% if is_super or role == 'admin' or section == 'followup' %}
+                {% if member.status != 'integrated' %}
+                <form method="post" action="{% url 'integration_quick' member.pk %}" class="inline">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="member_list">
+                  <button type="submit" class="p-1.5 rounded-lg hover:bg-emerald-100 text-emerald-400 hover:text-emerald-700 transition-colors" title="Mark as Integrated" onclick="return confirm('Mark {{ member.get_full_name }} as integrated?')">
+                    <i data-lucide="badge-check" class="w-3.5 h-3.5"></i>
+                  </button>
+                </form>
+                {% else %}
+                <span class="p-1.5 text-emerald-500" title="Already integrated">
+                  <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                </span>
+                {% endif %}
+              {% endif %}
               {% if is_super or role == 'section_admin' or role == 'admin' %}
-              <a href="{% url 'member_delete' member.pk %}"
-                 class="p-1.5 rounded-lg hover:bg-red-100 text-red-500 hover:text-red-800 transition-colors"
-                 title="Delete">
+              <a href="{% url 'member_delete' member.pk %}" class="p-1.5 rounded-lg hover:bg-red-100 text-red-500 hover:text-red-800 transition-colors" title="Delete">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               </a>
               {% endif %}
-              <a href="{% url 'contact_log_create' member.pk %}"
-   class="p-1.5 rounded-lg hover:bg-teal-100 text-teal-500 hover:text-teal-800 transition-colors"
-   title="Log Contact">
-  <i data-lucide="activity" class="w-3.5 h-3.5"></i>
-</a>
             </div>
           </td>
 
         </tr>
         {% empty %}
         <tr>
-          <td colspan="{% if is_super or role == 'section_admin' or role == 'admin' %}7{% else %}6{% endif %}"
-              class="px-5 py-12 text-center">
+          <td colspan="{% if is_super or role == 'section_admin' or role == 'admin' %}7{% else %}6{% endif %}" class="px-5 py-12 text-center">
             <i data-lucide="users" class="w-12 h-12 text-amber-100 mx-auto mb-3"></i>
             <p class="text-amber-400 font-medium">No members found</p>
             <p class="text-amber-300 text-xs mt-1">Try adjusting your filters or add a new member</p>
@@ -231,27 +217,176 @@
     </table>
   </div>
 
-  <!-- Pagination -->
   {% if members.has_other_pages %}
   <div class="px-5 py-4 border-t border-amber-50 flex items-center justify-between">
     <p class="text-xs text-amber-400">Page {{ members.number }} of {{ members.paginator.num_pages }}</p>
     <div class="flex items-center gap-1">
       {% if members.has_previous %}
-      <a href="?page={{ members.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if assigned_filter %}&assigned={{ assigned_filter }}{% endif %}"
-         class="btn-outline py-1.5 px-3 text-xs">
+      <a href="?page={{ members.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if assigned_filter %}&assigned={{ assigned_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="btn-outline py-1.5 px-3 text-xs">
         <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>Prev
       </a>
       {% endif %}
       {% if members.has_next %}
-      <a href="?page={{ members.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if assigned_filter %}&assigned={{ assigned_filter }}{% endif %}"
-         class="btn-outline py-1.5 px-3 text-xs">
+      <a href="?page={{ members.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if assigned_filter %}&assigned={{ assigned_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="btn-outline py-1.5 px-3 text-xs">
         Next<i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
       </a>
       {% endif %}
     </div>
   </div>
   {% endif %}
+</div>
 
+<div class="md:hidden space-y-3">
+  {% for member in members %}
+  <div class="card p-4">
+
+    {# Top: avatar + name + status #}
+    <div class="flex items-start justify-between gap-3 mb-3">
+      <a href="{% url 'member_detail' member.pk %}" class="flex items-center gap-2.5 min-w-0">
+        <div class="avatar text-xs bg-gradient-to-br from-amber-200 to-amber-400 text-amber-900 font-bold flex-shrink-0">{{ member.initials }}</div>
+        <div class="min-w-0">
+          <p class="font-semibold text-amber-900 text-sm truncate">
+            {{ member.get_full_name }}
+            {% if member.is_baptized %}<span class="ml-1 text-xs text-blue-600">✓</span>{% endif %}
+          </p>
+          <p class="text-xs text-amber-400 truncate">{{ member.phone|default:member.email|default:"No contact" }}</p>
+        </div>
+      </a>
+      <span class="badge badge-{{ member.status }} flex-shrink-0">{{ member.get_status_display }}</span>
+    </div>
+
+    {# Meta grid: visit date + assigned #}
+    <div class="grid grid-cols-2 gap-2 mb-3 text-xs">
+      <div>
+        <p class="text-amber-400 font-medium uppercase tracking-wide mb-0.5" style="font-size:10px;">First Visit</p>
+        <p class="text-amber-700">{{ member.first_visit_date|date:"M d, Y" }}</p>
+      </div>
+      <div>
+        <p class="text-amber-400 font-medium uppercase tracking-wide mb-0.5" style="font-size:10px;">
+          {% if section == 'greeters' %}Greeter{% else %}Assigned To{% endif %}
+        </p>
+        {% if section == 'greeters' %}
+          <p class="text-amber-700 truncate">{{ member.greeter_assigned_to.get_full_name|default:"—" }}</p>
+        {% elif section == 'followup' %}
+          <p class="text-amber-700 truncate">{{ member.assigned_to.get_full_name|default:"—" }}</p>
+        {% else %}
+          {% if member.greeter_assigned_to or member.assigned_to %}
+            {% if member.greeter_assigned_to %}<p class="text-amber-600 truncate"><span class="font-medium">G:</span> {{ member.greeter_assigned_to.get_full_name }}</p>{% endif %}
+            {% if member.assigned_to %}<p class="text-amber-600 truncate"><span class="font-medium">F:</span> {{ member.assigned_to.get_full_name }}</p>{% endif %}
+          {% else %}
+            <p class="text-amber-300 italic">Unassigned</p>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+
+    {# Quick Assign — admins only, collapsible on mobile #}
+    {% if is_super or role == 'section_admin' or role == 'admin' %}
+    <details class="mb-3">
+      <summary class="text-xs font-semibold text-amber-600 cursor-pointer py-1 select-none flex items-center gap-1">
+        <i data-lucide="user-check" class="w-3.5 h-3.5"></i>Quick Assign
+      </summary>
+      <form method="post" action="{% url 'member_assign' member.pk %}" class="flex items-center gap-2 mt-2">
+        {% csrf_token %}
+        {% if is_super or role == 'admin' and section == 'all' %}
+          <select name="assign_as" class="input-field py-1 text-xs w-28 flex-shrink-0">
+            <option value="greeters">Greeter</option>
+            <option value="followup">Follow-up</option>
+          </select>
+        {% else %}
+          <input type="hidden" name="assign_as" value="{{ section }}">
+        {% endif %}
+        <select name="staff_id" class="input-field py-1 text-xs flex-1 min-w-0">
+          <option value="">— pick staff —</option>
+          {% for s in staff %}
+            <option value="{{ s.pk }}"
+              {% if section == 'greeters' and member.greeter_assigned_to.pk == s.pk %}selected{% endif %}
+              {% if section == 'followup' and member.assigned_to.pk == s.pk %}selected{% endif %}>
+              {{ s.get_full_name|default:s.username }}
+            </option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="p-1.5 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-700 transition-colors flex-shrink-0" title="Assign">
+          <i data-lucide="check" class="w-3.5 h-3.5"></i>
+        </button>
+      </form>
+    </details>
+    {% endif %}
+
+    {# Action buttons #}
+    <div class="flex items-center gap-2 pt-2 border-t border-amber-50 flex-wrap">
+
+      <a href="{% url 'member_detail' member.pk %}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-semibold transition-colors">
+        <i data-lucide="eye" class="w-3.5 h-3.5"></i>View
+      </a>
+
+      {% if is_super or role == 'section_admin' or role == 'admin' %}
+      <a href="{% url 'member_edit' member.pk %}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-semibold transition-colors">
+        <i data-lucide="pencil" class="w-3.5 h-3.5"></i>Edit
+      </a>
+      {% endif %}
+
+      {% if is_super or role == 'admin' or section == 'followup' %}
+      <a href="{% url 'followup_create_for_member' member.pk %}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 hover:bg-green-100 text-green-700 text-xs font-semibold transition-colors">
+        <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>Follow-Up
+      </a>
+      {% endif %}
+
+      {% if is_super or role == 'admin' or section == 'followup' %}
+        {% if member.status != 'integrated' %}
+        <form method="post" action="{% url 'integration_quick' member.pk %}">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="member_list">
+          <button type="submit" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold transition-colors" onclick="return confirm('Mark {{ member.get_full_name }} as integrated?')">
+            <i data-lucide="badge-check" class="w-3.5 h-3.5"></i>Integrate
+          </button>
+        </form>
+        {% else %}
+        <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 text-xs font-semibold">
+          <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>Integrated
+        </span>
+        {% endif %}
+      {% endif %}
+
+      {% if is_super or role == 'section_admin' or role == 'admin' %}
+      <a href="{% url 'member_delete' member.pk %}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold transition-colors ml-auto">
+        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>Delete
+      </a>
+      {% endif %}
+
+    </div>
+  </div>
+  {% empty %}
+  <div class="card p-10 text-center">
+    <i data-lucide="users" class="w-12 h-12 text-amber-100 mx-auto mb-3"></i>
+    <p class="text-amber-400 font-medium">No members found</p>
+    <p class="text-amber-300 text-xs mt-1">Try adjusting your filters or add a new member</p>
+    {% if is_super or role == 'section_admin' or role == 'admin' %}
+    <a href="{% url 'member_create' %}" class="btn-gold mt-4 inline-flex">
+      <i data-lucide="plus" class="w-3.5 h-3.5"></i>Add First Member
+    </a>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+  {# Mobile pagination #}
+  {% if members.has_other_pages %}
+  <div class="flex items-center justify-between pt-2">
+    <p class="text-xs text-amber-400">Page {{ members.number }} of {{ members.paginator.num_pages }}</p>
+    <div class="flex gap-2">
+      {% if members.has_previous %}
+      <a href="?page={{ members.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if assigned_filter %}&assigned={{ assigned_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="btn-outline py-1.5 px-3 text-xs">
+        <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>Prev
+      </a>
+      {% endif %}
+      {% if members.has_next %}
+      <a href="?page={{ members.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if assigned_filter %}&assigned={{ assigned_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="btn-outline py-1.5 px-3 text-xs">
+        Next<i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
 </div>
 
 {% endwith %}

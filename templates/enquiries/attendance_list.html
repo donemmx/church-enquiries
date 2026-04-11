@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Attendance — Grace Chapel{% endblock %}
+{% block title %}Attendance — MIV Ojoo{% endblock %}
 {% block page_title %}Attendance Records{% endblock %}
 {% block header_actions %}
 <a href="{% url 'attendance_create' %}" class="btn-gold text-xs"><i data-lucide="plus" class="w-3.5 h-3.5"></i>Record Attendance</a>
@@ -7,7 +7,7 @@
 {% block content %}
 <div class="card overflow-hidden">
   <div class="overflow-x-auto">
-    <table class="w-full text-sm">
+    <table class="w-full text-sm" style="min-width:600px;">
       <thead>
         <tr class="border-b border-amber-50" style="background:#fdfbf7;">
           <th class="text-left px-5 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Member</th>
