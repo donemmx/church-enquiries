@@ -11,3 +11,4 @@ urlpatterns = [
     path('staff/<int:pk>/reset-password/', views.staff_reset_password, name='staff_reset_password'),
     path('staff/<int:pk>/deactivate/', views.staff_deactivate, name='staff_deactivate'),
 ]
+

@@ -30,15 +30,7 @@
         <label class="form-label">Search</label>
         <input type="text" name="search" value="{{ search }}" placeholder="Name…" class="input-field">
       </div>
-      <div>
-        <label class="form-label">Status</label>
-        <select name="status" class="input-field">
-          <option value="">All Statuses</option>
-          {% for val, label in status_choices %}
-          <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-      </div>
+      
       {% if is_section_admin %}
       <div>
         <label class="form-label">Assigned To</label>

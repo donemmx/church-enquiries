@@ -560,7 +560,7 @@ def followup_delete(request, pk):
     if request.method == 'POST':
         followup.delete()
         messages.success(request, 'Follow-up deleted successfully.')
-        return redirect('followup_list')
+        return redirect('followup_tasks')
     return render(request, 'enquiries/confirm_delete.html', {
         'object': followup, 'type': 'follow-up'
     })
@@ -570,39 +570,41 @@ def followup_delete(request, pk):
 def followup_complete(request, pk):
     followup = get_object_or_404(followup_qs(request.user), pk=pk)
     if request.method == 'POST':
-        followup.status         = 'completed'
-        followup.completed_date = timezone.now().date()
-        outcome = request.POST.get('outcome', '')
-        if outcome:
-            followup.outcome = outcome
-        followup.save()
+        round_num = request.POST.get('round', '1')
+        outcome   = request.POST.get('outcome', '')
 
-        # Auto-create round 2 only if this was round 1 and round 2 doesn't exist yet
-        if followup.follow_up_round == 1:
-            already_has_round2 = FollowUp.objects.filter(
-                member=followup.member,
-                follow_up_round=2,
-            ).exists()
-            if not already_has_round2:
-                FollowUp.objects.create(
-                    member          = followup.member,
-                    assigned_to     = followup.assigned_to,
-                    assigned_by     = followup.assigned_by,
-                    follow_up_type  = followup.follow_up_type,
-                    status          = 'pending',
-                    priority        = followup.priority,
-                    follow_up_round = 2,
-                    due_date        = timezone.now().date() + timedelta(days=7),
-                    notes           = f'Auto-created: second follow-up for {followup.member.get_full_name()}.',
-                )
-                messages.success(request, 'Follow-up completed! A second follow-up has been scheduled for next week.')
+        if round_num == '2':
+            # Complete round 2 in-place
+            followup.round2_status         = 'completed'
+            followup.round2_completed_date = timezone.now().date()
+            if outcome:
+                followup.round2_outcome = outcome
+            followup.status         = 'completed'   # mark whole record done
+            followup.completed_date = timezone.now().date()
+            followup.save()
+            messages.success(request, 'Second follow-up marked as completed!')
+        else:
+            # Complete round 1
+            followup.status         = 'completed'
+            followup.completed_date = timezone.now().date()
+            if outcome:
+                followup.outcome = outcome
+
+            # Schedule round 2 on the same record
+            if not followup.round2_due_date:
+                followup.round2_type    = followup.follow_up_type  # default; user can edit
+                followup.round2_due_date = timezone.now().date() + timedelta(days=7)
+                followup.round2_status  = 'pending'
+                followup.round2_notes   = f'Auto-scheduled second follow-up for {followup.member.get_full_name()}.'
+                followup.status         = 'in_progress'  # not fully done yet — round 2 pending
+                followup.completed_date = None
+                messages.success(request, 'Round 1 done! Second follow-up scheduled for next week.')
             else:
                 messages.success(request, 'Follow-up marked as completed!')
-        else:
-            messages.success(request, 'Follow-up marked as completed!')
+
+            followup.save()
 
     return redirect('followup_tasks')
-
 
 # ─────────────────────────────────────────────
 #  EVENTS
@@ -1085,6 +1087,152 @@ def greeter_assign_quick(request, pk):
         member.save()
         messages.success(request, f'Assigned {member.get_full_name()} to {staff_user.get_full_name()}.')
     return redirect('greeter_list')
+
+
+
+
+
+@login_required
+def greeter_tasks(request):
+    """
+    Greeter-section equivalent of followup_tasks.
+    Shows all members assigned to greeters, with contact log info,
+    second-visit status, and summary counts.
+    """
+    if get_section(request.user) == 'followup' and not can_see_all(request.user):
+        messages.error(request, 'Greeter tasks are managed by the Greeters section.')
+        return redirect('dashboard')
+ 
+    qs = member_qs(request.user).select_related('greeter_assigned_to').prefetch_related(
+        'contact_logs'
+    )
+ 
+    # Regular greeter staff only see their own assignments
+    if not can_see_all(request.user) and not is_section_admin(request.user):
+        qs = qs.filter(greeter_assigned_to=request.user)
+ 
+    search          = request.GET.get('search', '')
+    status_filter   = request.GET.get('status', '')
+    assigned_filter = request.GET.get('assigned', '')
+ 
+    if search:
+        qs = qs.filter(
+            Q(first_name__icontains=search) |
+            Q(last_name__icontains=search)
+        )
+    if status_filter:
+        qs = qs.filter(status=status_filter)
+    if assigned_filter:
+        qs = qs.filter(greeter_assigned_to_id=assigned_filter)
+ 
+    today = timezone.now().date()
+ 
+    # Summary counts
+    total_count     = qs.count()
+    # "pending" = new members not yet marked returning
+    pending_count = qs.filter(is_contacted=False).count()
+    # "overdue" = new members whose first_visit_date was > 7 days ago with no contact log
+    overdue_count = qs.filter(
+        is_contacted=False,
+        first_visit_date__lt=today - timedelta(days=7)
+    ).count()
+    # "contacted" = members who have at least one contact log
+    contacted_count = qs.filter(is_contacted=True).count()
+ 
+    # Annotate is_overdue_greeter on each member for template use
+    # (since Member model may not have this property, we compute it here
+    #  and attach it dynamically; or you can add a property to the model)
+    overdue_pks = set(
+        qs.filter(
+            status='new',
+            first_visit_date__lt=today - timedelta(days=7),
+            contact_logs__isnull=True
+        ).values_list('pk', flat=True)
+    )
+    member_list_qs = list(qs)
+    for m in member_list_qs:
+        m.is_overdue_greeter = m.pk in overdue_pks
+ 
+    staff = User.objects.filter(is_active=True, profile__section__in=['greeters', 'all'])
+ 
+    paginator = Paginator(qs, 20)
+    members   = paginator.get_page(request.GET.get('page'))
+ 
+    # Re-annotate the page objects (paginator slices the qs)
+    for m in members:
+        m.is_overdue_greeter = m.pk in overdue_pks
+ 
+    context = {
+        'members':          members,
+        'search':           search,
+        'status_filter':    status_filter,
+        'assigned_filter':  assigned_filter,
+        'staff':            staff,
+        'total_count':      total_count,
+        'pending_count':    pending_count,
+        'overdue_count':    overdue_count,
+        'contacted_count':  contacted_count,
+        'status_choices':   Member.STATUS_CHOICES,
+        'is_section_admin': is_section_admin(request.user),
+    }
+    return render(request, 'enquiries/greeter_tasks.html', context)
+ 
+ 
+@login_required
+def greeter_mark_returning(request, pk):
+    """
+    Quick action: mark a member's status as 'returning'.
+    Mirrors followup_complete for the greeters side.
+    """
+    if get_section(request.user) == 'followup' and not can_see_all(request.user):
+        messages.error(request, 'Access denied.')
+        return redirect('dashboard')
+ 
+    member = get_object_or_404(member_qs(request.user), pk=pk)
+ 
+    if request.method == 'POST':
+        if member.status == 'new':
+            member.status = 'returning'
+            # If you have a second_visit_date field on Member, set it:
+            # member.second_visit_date = timezone.now().date()
+            member.save()
+            messages.success(request, f'{member.get_full_name()} marked as returning!')
+        else:
+            messages.info(request, f'{member.get_full_name()} is already {member.get_status_display()}.')
+ 
+    return redirect('greeter_tasks')
+
+
+from django.utils import timezone
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def greeter_mark_contacted(request, pk):
+    member = get_object_or_404(member_qs(request.user), pk=pk)
+
+    if request.method == "POST":
+        member.is_contacted = True
+        member.contacted_at = timezone.now()
+        member.save()
+        messages.success(request, f"{member.get_full_name()} marked as contacted.")
+
+    return redirect('greeter_tasks')
+
+
+@login_required
+def delete_member(request, pk):
+    member = get_object_or_404(member_qs(request.user), pk=pk)
+
+    if request.method == "POST":
+        member.delete()
+        messages.success(request, "Member deleted.")
+
+    return redirect('greeter_tasks')
+
+
+
 
 
 # ─────────────────────────────────────────────

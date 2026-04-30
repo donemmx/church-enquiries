@@ -34,11 +34,6 @@
   </div>
   {% endif %}
 
-  <div class="card p-4 text-center border-t-4 border-pink-400">
-    <p class="text-2xl font-bold text-amber-950">{{ all_prayers }}</p>
-    <p class="text-xs text-amber-500 mt-0.5">Prayer Requests</p>
-  </div>
-
   {# Integration rate — visible to followup section and superuser #}
   {% if can_see_all or section == 'followup' %}
   <div class="card p-4 text-center border-t-4 border-green-400">

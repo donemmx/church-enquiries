@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,9 +13,46 @@
         theme: {
           extend: {
             colors: {
-              gold: { 50:'#fdf9ee', 100:'#faf0cc', 200:'#f4dc8a', 300:'#eec548', 400:'#e6ac1f', 500:'#c98e10', 600:'#a06e0c', 700:'#7a500d', 800:'#5c3c10', 900:'#3d280d' },
-              wine: { 500:'#d43a58', 600:'#b92040', 700:'#9a1a35' },
-              parch: { 50:'#fdfbf7', 100:'#faf5ec', 200:'#f3e8d0', 300:'#e9d5ab', 400:'#dab97a', 500:'#c9994d', 600:'#a97838', 700:'#865d2c', 800:'#664827', 900:'#4d3720' },
+              primary: {
+                50:  '#eff6ff',
+                100: '#dbeafe',
+                200: '#bfdbfe',
+                300: '#93c5fd',
+                400: '#60a5fa',
+                500: '#3b82f6',
+                600: '#2563eb',
+                700: '#1d4ed8',
+                800: '#1e40af',
+                900: '#1e3a8a',
+                950: '#172554',
+              },
+              navy: {
+                500: '#1e3a8a',
+                600: '#172554',
+                700: '#0f1b3d',
+                800: '#0a1228',
+                900: '#060c1a',
+              },
+              sky: {
+                50:  '#f0f9ff',
+                100: '#e0f2fe',
+                200: '#bae6fd',
+                300: '#7dd3fc',
+                400: '#38bdf8',
+                500: '#0ea5e9',
+              },
+              slate: {
+                50:  '#f8fafc',
+                100: '#f1f5f9',
+                200: '#e2e8f0',
+                300: '#cbd5e1',
+                400: '#94a3b8',
+                500: '#64748b',
+                600: '#475569',
+                700: '#334155',
+                800: '#1e293b',
+                900: '#0f172a',
+              },
             },
             fontFamily: { serif: ['Playfair Display', 'serif'], sans: ['DM Sans', 'sans-serif'] }
           }
@@ -22,62 +60,125 @@
       }
     </script>
     <style>
-      body { font-family: 'DM Sans', sans-serif; background: #fdfbf7; }
+      body { font-family: 'DM Sans', sans-serif; background: #f0f6ff; }
       h1, h2, .font-display { font-family: 'Playfair Display', serif; }
-      .sidebar { background: linear-gradient(180deg, #3d280d 0%, #5c3c10 60%, #4d3720 100%); }
+
+      /* ── Sidebar ── */
+      .sidebar { background: linear-gradient(180deg, #0f1b3d 0%, #1e3a8a 55%, #172554 100%); }
       .sidebar-link { transition: all 0.2s; border-right: 3px solid transparent; }
-      .sidebar-link:hover { background: rgba(233,213,171,0.15); color: #f4dc8a; }
-      .sidebar-link.active { background: rgba(233,213,171,0.2); color: #eec548; border-right-color: #c98e10; font-weight: 600; }
-      .card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(61,40,13,0.06), 0 4px 16px rgba(61,40,13,0.04); }
-      .btn-gold { background: linear-gradient(135deg, #c98e10 0%, #a06e0c 100%); color: white; padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.35rem; }
-      .btn-gold:hover { background: linear-gradient(135deg, #a06e0c 0%, #7a500d 100%); box-shadow: 0 4px 12px rgba(160,110,12,0.35); transform: translateY(-1px); }
-      .btn-outline { background: white; color: #5c3c10; border: 1px solid #e9d5ab; padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.35rem; }
-      .btn-outline:hover { background: #faf5ec; border-color: #c98e10; }
-      .btn-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.35rem; }
+      .sidebar-link:hover { background: rgba(147,197,253,0.12); color: #93c5fd; }
+      .sidebar-link.active { background: rgba(147,197,253,0.18); color: #60a5fa; border-right-color: #3b82f6; font-weight: 600; }
+
+      /* ── Cards ── */
+      .card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(30,58,138,0.06), 0 4px 16px rgba(30,58,138,0.05); }
+
+      /* ── Buttons ── */
+      .btn-gold {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: white; padding: 0.5rem 1.25rem; border-radius: 8px;
+        font-weight: 500; font-size: 0.875rem; transition: all 0.2s;
+        display: inline-flex; align-items: center; gap: 0.35rem;
+      }
+      .btn-gold:hover {
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+        box-shadow: 0 4px 12px rgba(37,99,235,0.4);
+        transform: translateY(-1px);
+      }
+      .btn-outline {
+        background: white; color: #1e3a8a;
+        border: 1px solid #bfdbfe; padding: 0.5rem 1.25rem; border-radius: 8px;
+        font-weight: 500; font-size: 0.875rem; transition: all 0.2s;
+        display: inline-flex; align-items: center; gap: 0.35rem;
+      }
+      .btn-outline:hover { background: #eff6ff; border-color: #3b82f6; }
+      .btn-danger {
+        background: #fee2e2; color: #991b1b;
+        border: 1px solid #fecaca; padding: 0.5rem 1.25rem; border-radius: 8px;
+        font-weight: 500; font-size: 0.875rem; transition: all 0.2s;
+        display: inline-flex; align-items: center; gap: 0.35rem;
+      }
       .btn-danger:hover { background: #fecaca; }
-      .input-field { width: 100%; border: 1.5px solid #e9d5ab; border-radius: 8px; padding: 0.55rem 0.85rem; font-size: 0.875rem; background: white; transition: border 0.2s, box-shadow 0.2s; color: #3d280d; font-family: 'DM Sans', sans-serif; }
-      .input-field:focus { outline: none; border-color: #c98e10; box-shadow: 0 0 0 3px rgba(201,142,16,0.12); }
-      select.input-field { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a06e0c' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2.2rem; appearance: none; }
+
+      /* ── Form inputs ── */
+      .input-field {
+        width: 100%; border: 1.5px solid #bfdbfe; border-radius: 8px;
+        padding: 0.55rem 0.85rem; font-size: 0.875rem; background: white;
+        transition: border 0.2s, box-shadow 0.2s; color: #172554;
+        font-family: 'DM Sans', sans-serif;
+      }
+      .input-field:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+      select.input-field {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232563eb' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right 0.75rem center;
+        padding-right: 2.2rem; appearance: none;
+      }
       textarea.input-field { resize: vertical; min-height: 90px; }
+
+      /* ── Badges ── */
       .badge { padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.01em; }
-      .badge-new { background: #dbeafe; color: #1e40af; }
-      .badge-returning { background: #e0e7ff; color: #4338ca; }
-      .badge-regular { background: #d1fae5; color: #065f46; }
-      .badge-member { background: #faf0cc; color: #a06e0c; }
-      .badge-inactive { background: #f3f4f6; color: #6b7280; }
-      .badge-pending { background: #fef3c7; color: #92400e; }
-      .badge-completed { background: #d1fae5; color: #065f46; }
-      .badge-in_progress { background: #dbeafe; color: #1e40af; }
-      .badge-no_response { background: #fee2e2; color: #991b1b; }
-      .badge-upcoming { background: #e0e7ff; color: #4338ca; }
-      .badge-draft { background: #f3f4f6; color: #6b7280; }
-      .badge-sent { background: #d1fae5; color: #065f46; }
-      .badge-scheduled { background: #fef3c7; color: #92400e; }
+      .badge-new        { background: #dbeafe; color: #1e40af; }
+      .badge-returning  { background: #e0e7ff; color: #4338ca; }
+      .badge-regular    { background: #d1fae5; color: #065f46; }
+      .badge-member     { background: #dbeafe; color: #1e40af; }
+      .badge-inactive   { background: #f3f4f6; color: #6b7280; }
+      .badge-pending    { background: #fef3c7; color: #92400e; }
+      .badge-completed  { background: #d1fae5; color: #065f46; }
+      .badge-in_progress{ background: #dbeafe; color: #1e40af; }
+      .badge-no_response{ background: #fee2e2; color: #991b1b; }
+      .badge-upcoming   { background: #e0e7ff; color: #4338ca; }
+      .badge-draft      { background: #f3f4f6; color: #6b7280; }
+      .badge-sent       { background: #d1fae5; color: #065f46; }
+      .badge-scheduled  { background: #fef3c7; color: #92400e; }
+      .badge-integrated { background: #d1fae5; color: #065f46; }
+
+      /* ── Alerts ── */
       .alert-success { background: #f0fdf4; border-left: 4px solid #22c55e; color: #166534; }
-      .alert-error { background: #fef2f2; border-left: 4px solid #ef4444; color: #991b1b; }
+      .alert-error   { background: #fef2f2; border-left: 4px solid #ef4444; color: #991b1b; }
       .alert-warning { background: #fffbeb; border-left: 4px solid #f59e0b; color: #92400e; }
-      .cross-bg { background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M18 0h4v40h-4zM0 18h40v4H0z' fill='%23c98e10' fill-opacity='0.03'/%3E%3C/svg%3E"); }
+
+      /* ── Cross/grid background ── */
+      .cross-bg {
+        background-color: #f0f6ff;
+        background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M18 0h4v40h-4zM0 18h40v4H0z' fill='%233b82f6' fill-opacity='0.03'/%3E%3C/svg%3E");
+      }
+
+      /* ── Animation ── */
       @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
       .fade-up { animation: fadeUp 0.35s ease-out; }
-      ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: #faf5ec; } ::-webkit-scrollbar-thumb { background: #dab97a; border-radius: 3px; }
-      .form-label { display: block; font-size: 0.8rem; font-weight: 600; color: #5c3c10; margin-bottom: 0.3rem; letter-spacing: 0.01em; }
-      .table-row:hover { background: #fdfbf7; }
-      .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
-      .section-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; }
-      .section-pill-greeters { background: rgba(29,158,117,0.18); color: #9FE1CB; }
-      .section-pill-followup  { background: rgba(186,117,23,0.2);  color: #FAC775; }
-      .section-pill-all       { background: rgba(127,119,221,0.2); color: #CECBF6; }
 
-      /* ── RESPONSIVE ── */
-#sidebar { transition: transform 0.25s ease; }
-#overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 25; }
-@media (max-width: 768px) {
-  #sidebar { transform: translateX(-100%); position: fixed; z-index: 30; }
-  #sidebar.open { transform: translateX(0); }
-  #overlay.show { display: block; }
-  #main-content { margin-left: 0 !important; }
-}
-.overflow-x-auto { -webkit-overflow-scrolling: touch; }
+      /* ── Scrollbar ── */
+      ::-webkit-scrollbar { width: 5px; }
+      ::-webkit-scrollbar-track { background: #eff6ff; }
+      ::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 3px; }
+
+      /* ── Form label ── */
+      .form-label { display: block; font-size: 0.8rem; font-weight: 600; color: #1e3a8a; margin-bottom: 0.3rem; letter-spacing: 0.01em; }
+
+      /* ── Table row hover ── */
+      .table-row:hover { background: #f8fbff; }
+
+      /* ── Avatar ── */
+      .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+
+      /* ── Section pills ── */
+      .section-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; }
+      .section-pill-greeters { background: rgba(16,185,129,0.18); color: #6ee7b7; }
+      .section-pill-followup  { background: rgba(59,130,246,0.22); color: #93c5fd; }
+      .section-pill-all       { background: rgba(139,92,246,0.2);  color: #c4b5fd; }
+
+      /* ── Header ── */
+      header { background: rgba(255,255,255,0.90) !important; border-bottom-color: #bfdbfe !important; }
+
+      /* ── Responsive sidebar ── */
+      #sidebar { transition: transform 0.25s ease; }
+      #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 25; }
+      @media (max-width: 768px) {
+        #sidebar { transform: translateX(-100%); position: fixed; z-index: 30; }
+        #sidebar.open { transform: translateX(0); }
+        #overlay.show { display: block; }
+        #main-content { margin-left: 0 !important; }
+      }
+      .overflow-x-auto { -webkit-overflow-scrolling: touch; }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
@@ -85,7 +186,6 @@
 
 {% if user.is_authenticated %}
 
-{# ── Resolve role/section once for the whole template ── #}
 {% with profile=user.profile section=user.profile.section role=user.profile.role %}
 {% with is_super=user.is_superuser %}
 {% with can_see_all=is_super|default:False %}
@@ -100,12 +200,12 @@
     <!-- Brand -->
     <div class="px-5 py-6 border-b border-white/10">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-yellow-300 to-yellow-600 flex items-center justify-center shadow">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow">
+          <img src="{% static 'accounts/images/MIV.png' %}" alt="" style="border-radius: 50%;">
         </div>
         <div>
-          <p style="font-family:'Playfair Display',serif;" class="text-yellow-100 font-semibold text-sm">MIV Ojoo</p>
-          <p class="text-yellow-500/60 text-xs">Enquiries Portal</p>
+          <p style="font-family:'Playfair Display',serif;" class="text-blue-100 font-semibold text-sm">MIV Ojoo</p>
+          <p class="text-blue-300/60 text-xs">Enquiries Portal</p>
         </div>
       </div>
     </div>
@@ -113,18 +213,18 @@
     <!-- User info + section pill -->
     <div class="px-4 py-3 border-b border-white/10">
       <div class="flex items-center gap-2.5 rounded-xl px-3 py-2" style="background:rgba(255,255,255,0.07);">
-        <div class="avatar bg-gradient-to-br from-yellow-400 to-amber-600 text-white text-xs">
+        <div class="avatar bg-gradient-to-br from-blue-400 to-blue-700 text-white text-xs">
           {{ user.first_name|slice:":1"|upper }}{{ user.last_name|slice:":1"|upper }}
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-yellow-100 text-xs font-semibold truncate">{{ user.get_full_name|default:user.username }}</p>
+          <p class="text-blue-100 text-xs font-semibold truncate">{{ user.get_full_name|default:user.username }}</p>
           <div class="flex items-center gap-1 mt-0.5">
             {% if role == 'admin' %}
-              <span class="text-yellow-500/70 text-xs">Administrator</span>
+              <span class="text-blue-300/70 text-xs">Administrator</span>
             {% elif role == 'section_admin' %}
-              <span class="text-yellow-500/70 text-xs">Section Admin</span>
+              <span class="text-blue-300/70 text-xs">Section Admin</span>
             {% else %}
-              <span class="text-yellow-500/70 text-xs">Staff</span>
+              <span class="text-blue-300/70 text-xs">Staff</span>
             {% endif %}
             {% if section == 'greeters' %}
               <span class="section-pill section-pill-greeters">Greeters</span>
@@ -146,56 +246,41 @@
       ──────────────────────────────────────── -->
       {% if is_super or role == 'admin' and section == 'all' %}
 
-        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Overview</p>
-        <a href="{% url 'dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        <p class="text-blue-400/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Overview</p>
+        <a href="{% url 'dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
           <i data-lucide="layout-dashboard" class="w-4 h-4 flex-shrink-0"></i>Dashboard
         </a>
-        <a href="{% url 'member_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'member_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        <a href="{% url 'member_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'member_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
           <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>First Timers List
         </a>
 
-        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Follow Up</p>
-        <a href="{% url 'followup_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'followup_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>Assignments
-        </a>
-        <a href="{% url 'followup_tasks' %}" class="sidebar-link {% if request.resolver_match.url_name == 'followup_tasks' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        <p class="text-blue-400/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Follow Up</p>
+        <a href="{% url 'followup_tasks' %}" class="sidebar-link {% if request.resolver_match.url_name == 'followup_tasks' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
           <i data-lucide="clipboard-list" class="w-4 h-4 flex-shrink-0"></i>Tasks
         </a>
 
-        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Greeters</p>
-        <a href="{% url 'greeter_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'greeter_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="hand" class="w-4 h-4 flex-shrink-0"></i>Assignments
+        <p class="text-blue-400/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Greeters</p>
+        
+        <a href="{% url 'greeter_tasks' %}" class="sidebar-link {% if request.resolver_match.url_name == 'greeter_tasks' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
+          <i data-lucide="clipboard-list" class="w-4 h-4 flex-shrink-0"></i>Tasks
         </a>
 
-        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Records</p>
-        <a href="{% url 'integration_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'integration_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        <p class="text-blue-400/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Records</p>
+        <a href="{% url 'integration_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'integration_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
           <i data-lucide="check-square" class="w-4 h-4 flex-shrink-0"></i>Integrations
         </a>
-        {% comment %}
-        <!-- <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>Contact Logs
-        </a> -->
 
-        <!-- <a href="{% url 'prayer_list' %}" class="sidebar-link {% if 'prayer' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="heart" class="w-4 h-4 flex-shrink-0"></i>Prayer Requests
-        </a> -->
-        {% endcomment %}
-
-        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Communication</p>
-        <a href="{% url 'message_list' %}" class="sidebar-link {% if 'message' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        <p class="text-blue-400/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Communication</p>
+        <a href="{% url 'message_list' %}" class="sidebar-link {% if 'message' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
           <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>Messages
         </a>
-        
 
-        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Admin</p>
-        <a href="{% url 'admin_panel' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        <p class="text-blue-400/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Admin</p>
+        <a href="{% url 'admin_panel' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
           <i data-lucide="shield" class="w-4 h-4 flex-shrink-0"></i>Admin Panel
         </a>
-        <a href="{% url 'admin_staff' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_staff' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        <a href="{% url 'admin_staff' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_staff' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
           <i data-lucide="user-cog" class="w-4 h-4 flex-shrink-0"></i>Staff Management
-        </a>
-        <a href="{% url 'admin_reports' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_reports' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="bar-chart-2" class="w-4 h-4 flex-shrink-0"></i>Reports
         </a>
 
       <!-- ────────────────────────────────────────
@@ -203,35 +288,23 @@
       ──────────────────────────────────────── -->
       {% elif section == 'greeters' and role == 'section_admin' %}
 
-        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Greeters</p>
-        <a href="{% url 'member_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'member_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        <p class="text-blue-400/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Greeters</p>
+        <a href="{% url 'member_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'member_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
           <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>First Timers List
         </a>
-        <a href="{% url 'greeter_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'greeter_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="hand" class="w-4 h-4 flex-shrink-0"></i>Assignments
+        <a href="{% url 'greeter_tasks' %}" class="sidebar-link {% if request.resolver_match.url_name == 'greeter_tasks' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
+          <i data-lucide="clipboard-list" class="w-4 h-4 flex-shrink-0"></i>Tasks
         </a>
-
-        {% comment %}
-        <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>Contact Logs
-        </a>
-        <a href="{% url 'prayer_list' %}" class="sidebar-link {% if 'prayer' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="heart" class="w-4 h-4 flex-shrink-0"></i>Prayer Requests
-        </a>
-        <!-- <a href="{% url 'message_list' %}" class="sidebar-link {% if 'message' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        <a href="{% url 'message_list' %}" class="sidebar-link {% if 'message' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
           <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>Messages
-        </a> -->
-        {% endcomment %}
+        </a>
 
-        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Admin</p>
-        <a href="{% url 'admin_panel' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        <p class="text-blue-400/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Admin</p>
+        <a href="{% url 'admin_panel' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
           <i data-lucide="shield" class="w-4 h-4 flex-shrink-0"></i>Section Panel
         </a>
-        <a href="{% url 'admin_staff' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_staff' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        <a href="{% url 'admin_staff' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_staff' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
           <i data-lucide="user-cog" class="w-4 h-4 flex-shrink-0"></i>Staff Management
-        </a>
-        <a href="{% url 'admin_reports' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_reports' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="bar-chart-2" class="w-4 h-4 flex-shrink-0"></i>Reports
         </a>
 
       <!-- ────────────────────────────────────────
@@ -239,55 +312,38 @@
       ──────────────────────────────────────── -->
       {% elif section == 'greeters' and role == 'staff' %}
 
-        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Greeters</p>
-        <a href="{% url 'greeter_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'greeter_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="hand" class="w-4 h-4 flex-shrink-0"></i>My Assignments
+        <p class="text-blue-400/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Greeters</p>
+        <a href="{% url 'greeter_tasks' %}" class="sidebar-link {% if request.resolver_match.url_name == 'greeter_tasks' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
+          <i data-lucide="clipboard-list" class="w-4 h-4 flex-shrink-0"></i>Tasks
         </a>
-        {% comment %}
-        <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>Contact Logs
-        </a>
-        <a href="{% url 'prayer_list' %}" class="sidebar-link {% if 'prayer' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="heart" class="w-4 h-4 flex-shrink-0"></i>Prayer Requests
-        </a>
-        {% endcomment %}
 
       <!-- ────────────────────────────────────────
            FOLLOW-UP — section admin
       ──────────────────────────────────────── -->
       {% elif section == 'followup' and role == 'section_admin' %}
 
-        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">First Timers</p>
-        <a href="{% url 'member_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'member_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        <p class="text-blue-400/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">First Timers</p>
+        <a href="{% url 'member_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'member_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
           <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>First Timers List
         </a>
-        <a href="{% url 'followup_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'followup_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>Assignments
-        </a>
-        <a href="{% url 'followup_tasks' %}" class="sidebar-link {% if request.resolver_match.url_name == 'followup_tasks' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        <a href="{% url 'followup_tasks' %}" class="sidebar-link {% if request.resolver_match.url_name == 'followup_tasks' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
           <i data-lucide="clipboard-list" class="w-4 h-4 flex-shrink-0"></i>Tasks
         </a>
-        {% comment %}
-        <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>Contact Logs
-        </a>
-        <a href="{% url 'prayer_list' %}" class="sidebar-link {% if 'prayer' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="heart" class="w-4 h-4 flex-shrink-0"></i>Prayer Requests
-        </a>
-        <!-- <a href="{% url 'message_list' %}" class="sidebar-link {% if 'message' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        <a href="{% url 'message_list' %}" class="sidebar-link {% if 'message' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
           <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>Messages
-        </a> -->
-        {% endcomment %}
+        </a>
 
-        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Admin</p>
-        <a href="{% url 'admin_panel' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        <p class="text-blue-400/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Records</p>
+        <a href="{% url 'integration_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'integration_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
+          <i data-lucide="check-square" class="w-4 h-4 flex-shrink-0"></i>Integrations
+        </a>
+
+        <p class="text-blue-400/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Admin</p>
+        <a href="{% url 'admin_panel' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
           <i data-lucide="shield" class="w-4 h-4 flex-shrink-0"></i>Section Panel
         </a>
-        <a href="{% url 'admin_staff' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_staff' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        <a href="{% url 'admin_staff' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_staff' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
           <i data-lucide="user-cog" class="w-4 h-4 flex-shrink-0"></i>Staff Management
-        </a>
-        <a href="{% url 'admin_reports' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_reports' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="bar-chart-2" class="w-4 h-4 flex-shrink-0"></i>Reports
         </a>
 
       <!-- ────────────────────────────────────────
@@ -295,21 +351,10 @@
       ──────────────────────────────────────── -->
       {% elif section == 'followup' and role == 'staff' %}
 
-        <p class="text-yellow-600/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Follow-Up</p>
-        <a href="{% url 'followup_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'followup_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>My Assignments
-        </a>
-        <a href="{% url 'followup_tasks' %}" class="sidebar-link {% if request.resolver_match.url_name == 'followup_tasks' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+        <p class="text-blue-400/50 text-xs font-semibold uppercase tracking-widest px-3 mb-2">Follow-Up</p>
+        <a href="{% url 'followup_tasks' %}" class="sidebar-link {% if request.resolver_match.url_name == 'followup_tasks' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
           <i data-lucide="clipboard-list" class="w-4 h-4 flex-shrink-0"></i>My Tasks
         </a>
-        {% comment %}
-        <a href="{% url 'contact_log_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'contact_log_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="activity" class="w-4 h-4 flex-shrink-0"></i>Contact Logs
-        </a>
-        <a href="{% url 'prayer_list' %}" class="sidebar-link {% if 'prayer' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
-          <i data-lucide="heart" class="w-4 h-4 flex-shrink-0"></i>Prayer Requests
-        </a>
-        {% endcomment %}
 
       {% endif %}
 
@@ -317,10 +362,10 @@
 
     <!-- Bottom: profile + logout -->
     <div class="px-3 pb-5 border-t border-white/10 pt-3 space-y-0.5">
-      <a href="{% url 'profile' %}" class="sidebar-link flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-200/80 text-sm">
+      <a href="{% url 'profile' %}" class="sidebar-link flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
         <i data-lucide="user" class="w-4 h-4"></i>My Profile
       </a>
-      <a href="{% url 'logout' %}" class="sidebar-link flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-yellow-500/60 text-sm hover:text-red-400">
+      <a href="{% url 'logout' %}" class="sidebar-link flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-300/60 text-sm hover:text-red-400">
         <i data-lucide="log-out" class="w-4 h-4"></i>Sign Out
       </a>
     </div>
@@ -331,28 +376,28 @@
   ═══════════════════════════════════════════ -->
   <div id="overlay" onclick="closeSidebar()"></div>
 
-<main id="main-content" class="flex-1 flex flex-col min-h-screen" style="margin-left:256px;">
+  <main id="main-content" class="flex-1 flex flex-col min-h-screen" style="margin-left:256px;">
 
-  <header class="sticky top-0 z-20 bg-white/85 backdrop-blur-md border-b border-amber-100 px-4 py-3.5 flex items-center justify-between gap-2">
-    
-    <!-- Hamburger — mobile only -->
-    <button onclick="openSidebar()" class="md:hidden flex-shrink-0 p-2 rounded-lg hover:bg-amber-50 text-amber-700">
-      <i data-lucide="menu" class="w-5 h-5"></i>
-    </button>
+    <header class="sticky top-0 z-20 bg-white/85 backdrop-blur-md border-b border-blue-100 px-4 py-3.5 flex items-center justify-between gap-2">
 
-    <div class="flex-1 min-w-0">
-      <h2 style="font-family:'Playfair Display',serif;" class="text-base md:text-lg font-semibold text-amber-950 truncate">{% block page_title %}{% endblock %}</h2>
-      <p class="text-xs text-amber-700/50 mt-0.5 hidden sm:block">{% block page_subtitle %}{% endblock %}</p>
-    </div>
-    <div class="flex items-center gap-2 flex-shrink-0">
-      {% block header_actions %}{% endblock %}
-      {% if is_super or role == 'admin' or role == 'section_admin' %}
-      <a href="{% url 'member_create' %}" class="btn-gold text-xs">
-        <i data-lucide="plus" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">New Member</span>
-      </a>
-      {% endif %}
-    </div>
-  </header>
+      <!-- Hamburger — mobile only -->
+      <button onclick="openSidebar()" class="md:hidden flex-shrink-0 p-2 rounded-lg hover:bg-blue-50 text-blue-700">
+        <i data-lucide="menu" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex-1 min-w-0">
+        <h2 style="font-family:'Playfair Display',serif;" class="text-base md:text-lg font-semibold text-blue-950 truncate">{% block page_title %}{% endblock %}</h2>
+        <p class="text-xs text-blue-600/50 mt-0.5 hidden sm:block">{% block page_subtitle %}{% endblock %}</p>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        {% block header_actions %}{% endblock %}
+        {% if is_super or role == 'admin' or role == 'section_admin' %}
+        <a href="{% url 'member_create' %}" class="btn-gold text-xs">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">New Member</span>
+        </a>
+        {% endif %}
+      </div>
+    </header>
 
     <div class="flex-1 p-6 fade-up">
       {% if messages %}
@@ -370,7 +415,7 @@
       {% block content %}{% endblock %}
     </div>
 
-    <footer class="py-3 px-6 text-center text-xs text-amber-400/60 border-t border-amber-50 bg-white/40">
+    <footer class="py-3 px-6 text-center text-xs text-blue-400/60 border-t border-blue-50 bg-white/40">
       &copy; {% now "Y" %} MIV Ojoo Enquiries Portal &mdash; Serving with Excellence
     </footer>
   </main>
@@ -392,7 +437,6 @@
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('overlay').classList.remove('show');
   }
-  // Close sidebar on nav link click (mobile)
   document.querySelectorAll('#sidebar a').forEach(a => {
     a.addEventListener('click', () => {
       if (window.innerWidth < 768) closeSidebar();

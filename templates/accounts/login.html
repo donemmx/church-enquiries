@@ -2,13 +2,16 @@
 {% block title %}Sign In — MIV Ojoo{% endblock %}
 
 {% block auth_content %}
-<div class="min-h-screen flex" style="background: linear-gradient(135deg, #3d280d 0%, #5c3c10 50%, #3d280d 100%);">
+{% load static %}
+<div class="min-h-screen flex" style="background: linear-gradient(135deg, #2310c9 0%, #2310c9 50%, #2310c9 100%);">
   <div class="hidden lg:flex lg:w-1/2 flex-col items-center justify-center px-16 relative overflow-hidden">
     <div class="absolute inset-0" style="background-image:url('data:image/svg+xml,%3Csvg width=60 height=60 viewBox=0 0 60 60 xmlns=http://www.w3.org/2000/svg%3E%3Cpath d=M27 0h6v60h-6zM0 27h60v6H0z fill=%23eec548 fill-opacity=.06/%3E%3C/svg%3E');"></div>
     <div class="relative text-center">
-      <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-yellow-300 to-amber-600 flex items-center justify-center mx-auto mb-8 shadow-2xl">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+      <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-2xl">
+        <!-- <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg> -->
+        <img src="{% static 'accounts/images/MIV.png' %}" alt="" style="border-radius: 50%;">
       </div>
+      
       <h1 style="font-family:'Playfair Display',serif;" class="text-4xl font-bold text-yellow-100 mb-4">MIV Ojoo</h1>
       <p class="text-yellow-300/70 text-lg mb-10">Enquiries & Membership Portal</p>
       <div class="space-y-4 text-left">
@@ -41,7 +44,7 @@
     <div class="w-full max-w-md">
       <div class="bg-white rounded-2xl shadow-2xl p-8">
         <div class="text-center mb-8">
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-800 flex items-center justify-center mx-auto mb-4 shadow-lg">
             <i data-lucide="lock" class="w-5 h-5 text-white"></i>
           </div>
           <h2 style="font-family:'Playfair Display',serif;" class="text-2xl font-bold text-amber-950">Welcome Back</h2>

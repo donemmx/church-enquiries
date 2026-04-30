@@ -2,10 +2,12 @@
 {% block title %}My Profile — MIV Ojoo{% endblock %}
 {% block page_title %}My Profile{% endblock %}
 {% block content %}
+{% load static %}
 <div class="max-w-lg">
   <div class="card p-6">
     <div class="flex items-center gap-4 mb-6 pb-6 border-b border-amber-50">
-      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-200 to-amber-500 flex items-center justify-center text-amber-900 font-bold text-xl shadow">
+      <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-amber-900 font-bold text-xl shadow">
+        <img src="{% static 'accounts/images/MIV.png' %}" alt="" style="border-radius: 50%;">
         {{ user.first_name|slice:":1"|upper }}{{ user.last_name|slice:":1"|upper }}
       </div>
       <div>

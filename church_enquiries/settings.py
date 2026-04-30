@@ -89,8 +89,8 @@ EMAIL_PORT = 465
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 
-EMAIL_HOST_USER = 'runsewemichael93@gmail.com'
-EMAIL_HOST_PASSWORD = 'hfpbryjcgnhdvfjv'
+EMAIL_HOST_USER = 'parachcomputers@gmail.com'
+EMAIL_HOST_PASSWORD = 'qxwphwjahefjyada'
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
@@ -103,3 +103,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 TERMII_API_KEY = "TLSRFdFLVgifWBQwMrTdQzykLCqAGKKhTOObsuiGYYusaKQuCOjjLwccOJmATm"
 TERMII_SENDER_ID = "MIV Ojoo"
 TERMII_SMS_URL = "https://api.ng.termii.com/api/sms/send"
+
+
+

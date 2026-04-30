@@ -3,11 +3,6 @@
 {% block page_title %}Follow-Up Tasks{% endblock %}
 {% block page_subtitle %}Track all follow-up tasks, due dates and completion{% endblock %}
 {% block header_actions %}
-{% if is_section_admin %}
-<a href="{% url 'followup_create' %}" class="btn-gold text-xs">
-  <i data-lucide="plus" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">New Task</span>
-</a>
-{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -59,24 +54,6 @@
           {% endfor %}
         </select>
       </div>
-      <div>
-        <label class="form-label">Type</label>
-        <select name="type" class="input-field">
-          <option value="">All Types</option>
-          {% for val, label in type_choices %}
-          <option value="{{ val }}" {% if type_filter == val %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div>
-        <label class="form-label">Priority</label>
-        <select name="priority" class="input-field">
-          <option value="">All Priorities</option>
-          <option value="3" {% if priority_filter == "3" %}selected{% endif %}>High</option>
-          <option value="2" {% if priority_filter == "2" %}selected{% endif %}>Medium</option>
-          <option value="1" {% if priority_filter == "1" %}selected{% endif %}>Low</option>
-        </select>
-      </div>
       {% if is_section_admin %}
       <div class="sm:col-span-2 lg:col-span-1">
         <label class="form-label">Assigned To</label>
@@ -105,25 +82,32 @@
 </div>
 
 
+
 <div class="card overflow-hidden hidden md:block">
   <div class="overflow-x-auto">
-    <table class="w-full text-sm" style="min-width:720px;">
+    <table class="w-full text-sm" style="min-width:860px;">
       <thead>
         <tr class="border-b border-amber-50" style="background:#fdfbf7;">
-          <th class="text-left px-5 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Member</th>
-          <th class="text-left px-4 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Type</th>
-          <th class="text-left px-4 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Priority</th>
-          <th class="text-left px-4 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Due Date</th>
+          <th class="text-left px-5 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Full Name</th>
+          
+          <th class="text-left px-4 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">
+            Follow Up 1
+          </th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-purple-500 uppercase tracking-wide">
+            <span class="flex items-center gap-1">
+              <i data-lucide="repeat-2" class="w-3 h-3"></i> Follow Up 2
+            </span>
+          </th>
           <th class="text-left px-4 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Status</th>
           <th class="text-left px-4 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Assigned To</th>
-          <th class="text-left px-4 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Notes</th>
           <th class="text-right px-5 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wide">Actions</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-amber-50">
         {% for fu in follow_ups %}
-        <tr class="table-row {% if fu.is_overdue %}bg-red-50/40{% elif fu.status == 'completed' %}opacity-60{% endif %}">
+        <tr class="table-row {% if fu.is_overdue %}bg-red-50/40{% elif fu.status == 'completed' and not fu.round2_due_date %}opacity-60{% elif fu.status == 'completed' and fu.round2_status == 'completed' %}opacity-60{% endif %}">
 
+          {# ── Member Name ── #}
           <td class="px-5 py-3.5">
             <a href="{% url 'member_detail' fu.member.pk %}" class="flex items-center gap-2 group">
               <div class="avatar text-xs bg-amber-100 text-amber-800 font-bold">{{ fu.member.initials }}</div>
@@ -134,46 +118,16 @@
             </a>
           </td>
 
-          <td class="px-4 py-3.5 text-amber-700">
-            <span class="flex items-center gap-1.5">
-              {% if fu.follow_up_type == 'call' %}<i data-lucide="phone" class="w-3 h-3 text-amber-400"></i>
-              {% elif fu.follow_up_type == 'email' %}<i data-lucide="mail" class="w-3 h-3 text-amber-400"></i>
-              {% elif fu.follow_up_type == 'sms' %}<i data-lucide="message-square" class="w-3 h-3 text-amber-400"></i>
-              {% elif fu.follow_up_type == 'visit' %}<i data-lucide="map-pin" class="w-3 h-3 text-amber-400"></i>
-              {% elif fu.follow_up_type == 'whatsapp' %}<i data-lucide="message-circle" class="w-3 h-3 text-amber-400"></i>
-              {% endif %}
-              {{ fu.get_follow_up_type_display }}
-            </span>
-            {% if fu.follow_up_round == 2 %}
-            <span class="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
-              <i data-lucide="repeat-2" class="w-3 h-3"></i> 2nd Visit
-            </span>
-            {% endif %}
-          </td>
+          
 
-          <td class="px-4 py-3.5">
-            {% if fu.priority == 3 %}
-              <span class="inline-flex items-center gap-1 text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
-                <i data-lucide="chevrons-up" class="w-3 h-3"></i> High
-              </span>
-            {% elif fu.priority == 2 %}
-              <span class="inline-flex items-center gap-1 text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
-                <i data-lucide="minus" class="w-3 h-3"></i> Medium
-              </span>
-            {% else %}
-              <span class="inline-flex items-center gap-1 text-xs font-semibold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full">
-                <i data-lucide="chevrons-down" class="w-3 h-3"></i> Low
-              </span>
-            {% endif %}
-          </td>
-
+          {# ── Round 1 Due Date ── #}
           <td class="px-4 py-3.5">
             {% if fu.due_date %}
               {% if fu.is_overdue %}
                 <span class="text-red-600 font-semibold flex items-center gap-1 text-xs">
                   <i data-lucide="alert-triangle" class="w-3 h-3"></i>{{ fu.due_date|date:"M d, Y" }}
                 </span>
-              {% elif fu.status == 'completed' and fu.completed_date %}
+              {% elif fu.completed_date %}
                 <span class="text-teal-600 text-xs flex items-center gap-1">
                   <i data-lucide="check" class="w-3 h-3"></i>Done {{ fu.completed_date|date:"M d, Y" }}
                 </span>
@@ -185,10 +139,60 @@
             {% endif %}
           </td>
 
+          {# ── Round 2 (inline, same row) ── #}
+          <td class="px-4 py-3.5">
+            {% if fu.round2_due_date %}
+              {% if fu.round2_status == 'completed' %}
+                {# Round 2 done #}
+                <span class="text-teal-600 text-xs flex items-center gap-1">
+                  <i data-lucide="check" class="w-3 h-3"></i>Done {{ fu.round2_completed_date|date:"M d, Y" }}
+                </span>
+              {% else %}
+                {# Round 2 pending — show type selector + due date + complete button #}
+                <div class="flex flex-col gap-1.5">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    {# Inline type selector for round 2 #}
+                    <form method="post" class="inline">
+                      {% csrf_token %}
+                      <input type="hidden" name="round2_only" value="1">
+                      <select name="round2_type"
+                        onchange="this.form.submit()"
+                        class="text-xs border border-purple-200 rounded-lg px-1.5 py-0.5 text-purple-700 bg-purple-50 focus:outline-none focus:ring-1 focus:ring-purple-300 cursor-pointer">
+                        <!-- <option value="call"      {% if fu.round2_type == 'call' or not fu.round2_type %}selected{% endif %}>Call</option> -->
+                        <!-- <option value="email"     {% if fu.round2_type == 'email' %}selected{% endif %}>Email</option> -->
+                        <!-- <option value="sms"       {% if fu.round2_type == 'sms' %}selected{% endif %}>SMS</option> -->
+                        <option value="visit"     {% if fu.round2_type == 'visit' %}selected{% endif %}>Visit</option>
+                        <!-- <option value="whatsapp"  {% if fu.round2_type == 'whatsapp' %}selected{% endif %}>WhatsApp</option> -->
+                      </select>
+                    </form>
+                    <span class="text-purple-600 text-xs font-medium">{{ fu.round2_due_date|date:"M d, Y" }}</span>
+                  </div>
+                  {# Complete round 2 button #}
+                  <form method="post" action="{% url 'followup_complete' fu.pk %}" class="inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="round" value="2">
+                    <button type="submit"
+                      class="inline-flex items-center gap-1 text-xs text-teal-600 bg-teal-50 hover:bg-teal-100 px-2 py-0.5 rounded-lg font-medium transition-colors"
+                      title="Mark Round 2 Complete"
+                      onclick="return confirm('Mark the second follow-up as completed?')">
+                      <i data-lucide="check-circle" class="w-3 h-3"></i> Mark Done
+                    </button>
+                  </form>
+                </div>
+              {% endif %}
+            {% elif fu.status == 'completed' %}
+              <span class="text-amber-200 text-xs italic">—</span>
+            {% else %}
+              <span class="text-amber-300 text-xs italic">After round 1</span>
+            {% endif %}
+          </td>
+
+          {# ── Overall Status ── #}
           <td class="px-4 py-3.5">
             <span class="badge badge-{{ fu.status }}">{{ fu.get_status_display }}</span>
           </td>
 
+          {# ── Assigned To ── #}
           <td class="px-4 py-3.5">
             {% if fu.assigned_to %}
             <div class="flex items-center gap-2">
@@ -202,33 +206,26 @@
             {% endif %}
           </td>
 
-          <td class="px-4 py-3.5 max-w-[160px]">
-            {% if fu.outcome %}
-              <p class="text-xs text-teal-700 truncate" title="{{ fu.outcome }}">
-                <i data-lucide="check-circle" class="w-3 h-3 inline mr-0.5 text-teal-500"></i>{{ fu.outcome }}
-              </p>
-            {% elif fu.notes %}
-              <p class="text-xs text-amber-500 truncate" title="{{ fu.notes }}">{{ fu.notes }}</p>
-            {% else %}
-              <span class="text-amber-200 text-xs">—</span>
-            {% endif %}
-          </td>
-
+          {# ── Actions ── #}
           <td class="px-5 py-3.5 text-right">
             <div class="flex items-center justify-end gap-1">
-              {% if fu.status != 'completed' %}
-              <form method="post" action="{% url 'followup_complete' fu.pk %}" class="inline">
-                {% csrf_token %}
-                <button type="submit" class="p-1.5 rounded-lg hover:bg-teal-100 text-teal-500 hover:text-teal-800 transition-colors" title="Mark Complete" onclick="return confirm('Mark this follow-up as completed?')">
-                  <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
-                </button>
-              </form>
+              {# Round 1 complete — only show if round 1 not yet done #}
+              {% if fu.status != 'completed' and fu.status != 'in_progress' or not fu.round2_due_date %}
+                {% if fu.status != 'completed' and not fu.round2_due_date %}
+                <form method="post" action="{% url 'followup_complete' fu.pk %}" class="inline">
+                  {% csrf_token %}
+                  <input type="hidden" name="round" value="1">
+                  <button type="submit"
+                    class="p-1.5 rounded-lg hover:bg-teal-100 text-teal-500 hover:text-teal-800 transition-colors"
+                    title="Mark Round 1 Complete"
+                    onclick="return confirm('Mark round 1 as completed and schedule round 2?')">
+                    <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+                  </button>
+                </form>
+                {% endif %}
               {% endif %}
-              {% if is_section_admin %}
-              <a href="{% url 'followup_edit' fu.pk %}" class="p-1.5 rounded-lg hover:bg-amber-100 text-amber-400 hover:text-amber-800 transition-colors" title="Edit Task">
-                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-              </a>
-              {% endif %}
+
+              
               <a href="{% url 'member_detail' fu.member.pk %}" class="p-1.5 rounded-lg hover:bg-amber-100 text-amber-400 hover:text-amber-800 transition-colors" title="View Member">
                 <i data-lucide="eye" class="w-3.5 h-3.5"></i>
               </a>
@@ -272,7 +269,7 @@
 
 <div class="md:hidden space-y-3">
   {% for fu in follow_ups %}
-  <div class="card p-4 {% if fu.is_overdue %}border border-red-200{% elif fu.status == 'completed' %}opacity-70{% endif %}">
+  <div class="card p-4 {% if fu.is_overdue %}border border-red-200{% elif fu.status == 'completed' and fu.round2_status == 'completed' %}opacity-70{% elif fu.status == 'completed' and not fu.round2_due_date %}opacity-70{% endif %}">
 
     {# Top row: avatar + name + status badge #}
     <div class="flex items-start justify-between gap-3 mb-3">
@@ -286,7 +283,7 @@
       <span class="badge badge-{{ fu.status }} flex-shrink-0">{{ fu.get_status_display }}</span>
     </div>
 
-    {# Meta row: type · priority · round #}
+    {# Meta row: type · priority #}
     <div class="flex flex-wrap items-center gap-2 mb-3">
       <span class="inline-flex items-center gap-1 text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full font-medium">
         {% if fu.follow_up_type == 'call' %}<i data-lucide="phone" class="w-3 h-3"></i>
@@ -311,24 +308,18 @@
           <i data-lucide="chevrons-down" class="w-3 h-3"></i>Low
         </span>
       {% endif %}
-
-      {% if fu.follow_up_round == 2 %}
-      <span class="inline-flex items-center gap-1 text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
-        <i data-lucide="repeat-2" class="w-3 h-3"></i>2nd Visit
-      </span>
-      {% endif %}
     </div>
 
-    {# Due date + assigned to #}
+    {# Round 1 info #}
     <div class="grid grid-cols-2 gap-2 mb-3 text-xs">
       <div>
-        <p class="text-amber-400 font-medium uppercase tracking-wide mb-0.5" style="font-size:10px;">Due Date</p>
+        <p class="text-amber-400 font-medium uppercase tracking-wide mb-0.5" style="font-size:10px;">Round 1 Due</p>
         {% if fu.due_date %}
           {% if fu.is_overdue %}
             <span class="text-red-600 font-semibold flex items-center gap-1">
               <i data-lucide="alert-triangle" class="w-3 h-3"></i>{{ fu.due_date|date:"M d, Y" }}
             </span>
-          {% elif fu.status == 'completed' and fu.completed_date %}
+          {% elif fu.completed_date %}
             <span class="text-teal-600 flex items-center gap-1">
               <i data-lucide="check" class="w-3 h-3"></i>Done {{ fu.completed_date|date:"M d, Y" }}
             </span>
@@ -349,6 +340,54 @@
       </div>
     </div>
 
+    
+    {% if fu.round2_due_date %}
+    <div class="bg-purple-50 border border-purple-100 rounded-xl px-3 py-2.5 mb-3">
+      <div class="flex items-center justify-between gap-2 mb-2">
+        <p class="text-xs font-semibold text-purple-600 flex items-center gap-1">
+          <i data-lucide="repeat-2" class="w-3 h-3"></i> Round 2
+        </p>
+        {% if fu.round2_status == 'completed' %}
+          <span class="text-xs text-teal-600 font-semibold flex items-center gap-1">
+            <i data-lucide="check" class="w-3 h-3"></i>Done {{ fu.round2_completed_date|date:"M d" }}
+          </span>
+        {% else %}
+          <span class="text-xs text-purple-600">Due {{ fu.round2_due_date|date:"M d, Y" }}</span>
+        {% endif %}
+      </div>
+
+      {% if fu.round2_status != 'completed' %}
+      <div class="flex items-center gap-2 flex-wrap">
+        {# Type selector for round 2 on mobile #}
+        <form method="post" action="{% url 'followup_edit' fu.pk %}" class="inline">
+          {% csrf_token %}
+          <input type="hidden" name="round2_only" value="1">
+          <select name="round2_type"
+            onchange="this.form.submit()"
+            class="text-xs border border-purple-200 rounded-lg px-1.5 py-1 text-purple-700 bg-white focus:outline-none focus:ring-1 focus:ring-purple-300 cursor-pointer">
+            <option value="call"      {% if fu.round2_type == 'call' or not fu.round2_type %}selected{% endif %}>Call</option>
+            <option value="email"     {% if fu.round2_type == 'email' %}selected{% endif %}>Email</option>
+            <option value="sms"       {% if fu.round2_type == 'sms' %}selected{% endif %}>SMS</option>
+            <option value="visit"     {% if fu.round2_type == 'visit' %}selected{% endif %}>Visit</option>
+            <option value="whatsapp"  {% if fu.round2_type == 'whatsapp' %}selected{% endif %}>WhatsApp</option>
+          </select>
+        </form>
+
+        {# Complete round 2 button (mobile) #}
+        <form method="post" action="{% url 'followup_complete' fu.pk %}">
+          {% csrf_token %}
+          <input type="hidden" name="round" value="2">
+          <button type="submit"
+            class="inline-flex items-center gap-1 text-xs text-teal-600 bg-teal-50 hover:bg-teal-100 px-2 py-1 rounded-lg font-semibold transition-colors"
+            onclick="return confirm('Mark the second follow-up as completed?')">
+            <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Mark Done
+          </button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
     {# Notes / outcome #}
     {% if fu.outcome or fu.notes %}
     <div class="bg-amber-50 rounded-lg px-3 py-2 mb-3 text-xs">
@@ -363,13 +402,17 @@
     </div>
     {% endif %}
 
-    {# Action buttons #}
+    {# Action buttons (mobile) #}
     <div class="flex items-center gap-2 pt-2 border-t border-amber-50">
-      {% if fu.status != 'completed' %}
+      {# Round 1 complete — only if round 1 not yet done and round 2 not started #}
+      {% if fu.status != 'completed' and not fu.round2_due_date %}
       <form method="post" action="{% url 'followup_complete' fu.pk %}" class="flex-1">
         {% csrf_token %}
-        <button type="submit" class="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-700 text-xs font-semibold transition-colors" onclick="return confirm('Mark this follow-up as completed?')">
-          <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>Mark Complete
+        <input type="hidden" name="round" value="1">
+        <button type="submit"
+          class="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-700 text-xs font-semibold transition-colors"
+          onclick="return confirm('Mark round 1 as completed and schedule round 2?')">
+          <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>Complete R1
         </button>
       </form>
       {% endif %}

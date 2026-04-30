@@ -9,10 +9,7 @@ class Member(models.Model):
 
     STATUS_CHOICES = [
         ('new', 'New Visitor'),
-        # ('returning', 'Returning Visitor'),
-        # ('regular', 'Regular Attendee'),
-        # ('member', 'Full Member'),
-        ('integrated', 'Integrated Member'),
+        ('integrated', 'Member'),
         ('inactive', 'Inactive'),
     ]
 
@@ -140,6 +137,9 @@ class Member(models.Model):
     is_baptized = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
+    is_contacted = models.BooleanField(default=False)
+    contacted_at = models.DateTimeField(null=True, blank=True)
+
     class Meta:
         ordering = ['-created_at']
 
@@ -174,17 +174,12 @@ class Ministry(models.Model):
 
 class FollowUp(models.Model):
     STATUS_CHOICES = [
-        ('pending', 'Pending'),
         ('in_progress', 'In Progress'),
         ('completed', 'Completed'),
-        ('no_response', 'No Response'),
     ]
     TYPE_CHOICES = [
         ('call', 'Phone Call'),
-        ('email', 'Email'),
-        ('sms', 'SMS'),
         ('visit', 'Personal Visit'),
-        ('whatsapp', 'WhatsApp'),
     ]
 
     member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='follow_ups')
@@ -204,6 +199,23 @@ class FollowUp(models.Model):
         choices=[(1, 'First Follow-Up'), (2, 'Second Follow-Up')],
         help_text="Which follow-up round this is"
     )
+
+    round2_type = models.CharField(
+        max_length=20, choices=[
+            ('call', 'Phone Call'), ('email', 'Email'), ('sms', 'SMS'),
+            ('visit', 'Personal Visit'), ('whatsapp', 'WhatsApp'),
+        ],
+        null=True, blank=True
+    )
+    round2_due_date = models.DateField(null=True, blank=True)
+    round2_status = models.CharField(
+        max_length=20,
+        choices=[('pending','Pending'),('completed','Completed'),('no_response','No Response')],
+        null=True, blank=True
+    )
+    round2_completed_date = models.DateField(null=True, blank=True)
+    round2_outcome = models.TextField(null=True, blank=True)
+    round2_notes = models.TextField(null=True, blank=True)
 
     class Meta:
         ordering = ['-priority', 'due_date']

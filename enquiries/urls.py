@@ -68,6 +68,10 @@ urlpatterns = [
     path('integration/add/<int:member_pk>/', views.integration_create, name='integration_create_for_member'),
     path('integration/<int:pk>/edit/',   views.integration_update,   name='integration_update'),
     path('members/<int:member_pk>/quick-integrate/', views.integration_quick, name='integration_quick'),
+    path('greeters/tasks/', views.greeter_tasks, name='greeter_tasks'),
+    path('greeters/mark-returning/<int:pk>/', views.greeter_mark_returning, name='greeter_mark_returning'),
+    path('greeter/<int:pk>/contacted/', views.greeter_mark_contacted, name='greeter_mark_contacted'),
+    path('member/<int:pk>/delete/', views.delete_member, name='delete_member'),
 
 
 

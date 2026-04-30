@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Greeter Assignments — MIV Ojoo{% endblock %}
+{% block page_title %}Greeter Assignments{% endblock %}
+{% block page_subtitle %}Track all greeter assignments and follow-ups{% endblock %}
+
+{% block content %}
+
+{# ── Summary Cards ── #}
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+
+  <div class="card p-4">
+    <p class="text-xs text-amber-400 uppercase mb-1">Total</p>
+    <p class="text-2xl font-bold text-amber-900">{{ total_count }}</p>
+  </div>
+
+  <div class="card p-4">
+    <p class="text-xs text-amber-400 uppercase mb-1">Pending</p>
+    <p class="text-2xl font-bold text-amber-600">{{ pending_count }}</p>
+  </div>
+
+  <div class="card p-4 {% if overdue_count > 0 %}border border-red-200 bg-red-50/40{% endif %}">
+    <p class="text-xs {% if overdue_count > 0 %}text-red-400{% else %}text-amber-400{% endif %} uppercase mb-1">
+      Overdue
+    </p>
+    <p class="text-2xl font-bold {% if overdue_count > 0 %}text-red-600{% else %}text-amber-900{% endif %}">
+      {{ overdue_count }}
+    </p>
+  </div>
+
+  <div class="card p-4">
+    <p class="text-xs text-amber-400 uppercase mb-1">Contacted</p>
+    <p class="text-2xl font-bold text-teal-600">{{ contacted_count }}</p>
+  </div>
+
+</div>
+
+{# ── Overdue Alert ── #}
+{% if overdue_count > 0 %}
+<div class="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-5 flex items-center gap-3">
+  <i data-lucide="alert-circle" class="w-4 h-4 text-red-500"></i>
+  <p class="text-sm text-red-700 font-medium">
+    {{ overdue_count }} overdue greeter assignment{{ overdue_count|pluralize }}
+  </p>
+</div>
+{% endif %}
+
+{# ── Filters ── #}
+<div class="card p-4 mb-5">
+  <form method="get">
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
+
+      <div>
+        <label class="form-label">Search</label>
+        <input type="text" name="search" value="{{ search }}" class="input-field" placeholder="Name...">
+      </div>
+
+      <div>
+        <label class="form-label">Status</label>
+        <select name="status" class="input-field">
+          <option value="">All</option>
+          {% for val, label in status_choices %}
+            <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      {% if is_section_admin %}
+      <div>
+        <label class="form-label">Assigned To</label>
+        <select name="assigned" class="input-field">
+          <option value="">All Greeters</option>
+          {% for s in staff %}
+            <option value="{{ s.pk }}" {% if assigned_filter == s.pk|stringformat:"s" %}selected{% endif %}>
+              {{ s.get_full_name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <div class="flex gap-2">
+      <button class="btn-gold text-xs">
+        <i data-lucide="filter" class="w-3.5 h-3.5"></i> Filter
+      </button>
+
+      {% if search or status_filter or assigned_filter %}
+      <a href="{% url 'greeter_tasks' %}" class="btn-outline text-xs">
+        Clear
+      </a>
+      {% endif %}
+    </div>
+
+  </form>
+</div>
+
+{# ── TABLE ── #}
+<div class="card overflow-hidden">
+  <div class="overflow-x-auto">
+
+    <table class="w-full text-sm">
+
+      <thead>
+        <tr class="bg-amber-50 border-b border-amber-100">
+          <th class="px-5 py-3 text-left text-xs font-semibold text-amber-600 uppercase">Full Name</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-amber-600 uppercase">Phone Number</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-amber-600 uppercase">Contact Date</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-amber-600 uppercase">Status</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-amber-600 uppercase">Assigned</th>
+          <th class="px-5 py-3 text-right text-xs font-semibold text-amber-600 uppercase">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-amber-50">
+
+        {% for member in members %}
+        <tr>
+
+          <td class="px-5 py-3">
+            <a href="{% url 'member_detail' member.pk %}" class="font-semibold text-amber-900 hover:text-amber-600">
+              {{ member.get_full_name }}
+            </a>
+          </td>
+
+          <td class="px-4 py-3 text-amber-700">
+            {{ member.phone|default:"—" }}
+          </td>
+
+          <td>
+            {% if member.is_contacted %}
+                <span class="text-amber-700">{{ member.contacted_at|date:"M j, Y" }}</span>
+            {% else %}
+                <span class="text-amber-300 italic">Not contacted yet</span>
+            {% endif %}
+          </td>
+
+          <td class="px-4 py-3">
+            {% if member.is_contacted %}
+              <span class="text-teal-600 font-medium">Contacted</span>
+            {% else %}
+              <span class="text-amber-300 italic">Pending</span>
+            {% endif %}
+          </td>
+
+          <td class="px-4 py-3 text-amber-700">
+            {% if member.greeter_assigned_to %}
+              {{ member.greeter_assigned_to.get_full_name }}
+            {% else %}
+              <span class="text-amber-300 italic">Unassigned</span>
+            {% endif %}
+          </td>
+
+          <td class="px-5 py-3 text-right">
+            <div class="flex justify-end gap-2">
+
+              {% if not member.is_contacted %}
+              <form method="post" action="{% url 'greeter_mark_contacted' member.pk %}">
+                {% csrf_token %}
+                <button class="p-2 text-teal-600 hover:bg-teal-100 rounded-lg" title="Mark Contacted">
+                  <i data-lucide="phone-call" class="w-4 h-4"></i>
+                </button>
+              </form>
+              {% endif %}
+
+              <form method="post" action="{% url 'delete_member' member.pk %}">
+                {% csrf_token %}
+                <button class="p-2 text-red-600 hover:bg-red-100 rounded-lg"
+                        onclick="return confirm('Delete {{ member.get_full_name }}?')">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </form>
+
+            </div>
+          </td>
+
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-center py-10 text-amber-400">
+            No members found
+          </td>
+        </tr>
+        {% endfor %}
+
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+{% endblock %}

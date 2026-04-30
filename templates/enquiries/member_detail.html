@@ -6,9 +6,6 @@
 <a href="{% url 'member_edit' member.pk %}" class="btn-outline text-xs">
   <i data-lucide="pencil" class="w-3.5 h-3.5"></i>Edit
 </a>
-<a href="{% url 'followup_create_for_member' member.pk %}" class="btn-outline text-xs">
-  <i data-lucide="plus" class="w-3.5 h-3.5"></i>Follow-Up
-</a>
 {% endblock %}
 
 {% block content %}
@@ -60,9 +57,7 @@
     <div class="card p-5">
       <div class="flex items-center justify-between mb-4">
         <h4 style="font-family:'Playfair Display',serif;" class="font-semibold text-amber-950">Follow-Up History</h4>
-        <a href="{% url 'followup_create_for_member' member.pk %}" class="btn-gold text-xs py-1.5">
-          <i data-lucide="plus" class="w-3.5 h-3.5"></i>Add
-        </a>
+        
       </div>
       {% if follow_ups %}
       <div class="space-y-2">
@@ -94,23 +89,8 @@
       {% endif %}
     </div>
 
-    <!-- Prayer Requests -->
-    {% if prayer_requests %}
-    <div class="card p-5">
-      <h4 style="font-family:'Playfair Display',serif;" class="font-semibold text-amber-950 mb-4">Prayer Requests</h4>
-      <div class="space-y-2">
-        {% for pr in prayer_requests %}
-        <div class="p-3 rounded-xl bg-pink-50 border border-pink-100">
-          <div class="flex items-center justify-between mb-1">
-            <span class="badge {% if pr.status == 'answered' %}bg-green-100 text-green-700{% else %}bg-pink-100 text-pink-700{% endif %}">{{ pr.get_status_display }}</span>
-            <span class="text-xs text-amber-400">{{ pr.created_at|date:"M d" }}</span>
-          </div>
-          <p class="text-sm text-amber-800">{% if pr.is_anonymous %}[Anonymous]{% else %}{{ pr.request }}{% endif %}</p>
-        </div>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
+    
+    
 
     <!-- Notes -->
     <div class="card p-5">
@@ -131,22 +111,6 @@
         <button type="submit" class="btn-gold text-xs"><i data-lucide="plus" class="w-3.5 h-3.5"></i>Add Note</button>
       </form>
     </div>
-
-    <!-- Attendance -->
-    {% if attendance %}
-    <div class="card p-5">
-      <h4 style="font-family:'Playfair Display',serif;" class="font-semibold text-amber-950 mb-4">Recent Attendance</h4>
-      <div class="flex flex-wrap gap-2">
-        {% for att in attendance %}
-        <div class="flex items-center gap-1.5 bg-green-50 border border-green-100 rounded-lg px-2.5 py-1.5">
-          <i data-lucide="check" class="w-3 h-3 text-green-500"></i>
-          <span class="text-xs font-medium text-green-800">{{ att.date|date:"M d" }}</span>
-          <span class="text-xs text-green-600">{{ att.service_type }}</span>
-        </div>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
   </div>
 </div>
 {% endblock %}
