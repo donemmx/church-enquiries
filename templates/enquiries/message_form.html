@@ -34,77 +34,172 @@
         {{ form.body }}
       </div>
 
-      <!-- SEND OPTIONS -->
-      <div class="p-4 rounded-xl" style="background:#fdfbf7; border:1.5px dashed #e9d5ab;">
-        
-        <div class="flex items-center gap-2 mb-3">
+      <!-- ══════════════════════════════════════
+           RECIPIENTS / SEND OPTIONS
+      ══════════════════════════════════════ -->
+      <div class="p-4 rounded-xl space-y-4" style="background:#fdfbf7; border:1.5px dashed #e9d5ab;">
+
+        <p class="text-xs font-semibold text-amber-700 uppercase tracking-wide">Who receives this?</p>
+
+        <!-- Option A: Send to ALL -->
+        <label class="flex items-center gap-2 cursor-pointer">
           {{ form.send_to_all }}
-          <label class="text-sm font-semibold text-amber-800">
-            Send to ALL active members
-          </label>
-        </div>
+          <span class="text-sm font-semibold text-amber-800">Send to ALL active members</span>
+        </label>
 
-        <!-- FILTER BOX -->
-        <div id="filtersBox" class="mt-4 space-y-3 hidden">
-
-          <p class="text-sm text-gray-500">
-            Apply filters to target specific members
-          </p>
-
+        <!-- Option B: Filter by date -->
+        <div id="filtersBox" class="space-y-3">
+          <p class="text-xs text-amber-500 font-medium">— or filter by registration date —</p>
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="form-label">Date Registered From</label>
               <input type="date" name="date_from" class="input-field">
             </div>
-
             <div>
               <label class="form-label">Date Registered To</label>
               <input type="date" name="date_to" class="input-field">
             </div>
           </div>
-
         </div>
+
+        <!-- Option C: Specific phone numbers -->
+        <div class="pt-1">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="h-px flex-1 bg-amber-100"></div>
+            <p class="text-xs text-amber-500 font-medium whitespace-nowrap">— or send to specific numbers —</p>
+            <div class="h-px flex-1 bg-amber-100"></div>
+          </div>
+
+          <label class="form-label">
+            Phone Numbers
+            <span class="text-amber-400 font-normal">(comma-separated, e.g. 08012345678, 07099887766)</span>
+          </label>
+
+          <div class="relative">
+            <textarea
+              name="manual_phones"
+              id="manualPhones"
+              rows="3"
+              placeholder="08012345678, 07099887766, +2348023456789…"
+              class="input-field font-mono text-xs"
+              style="resize:vertical;"
+            ></textarea>
+
+            {# Live count badge #}
+            <span id="phoneCount"
+              class="absolute bottom-2 right-2 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-600 hidden">
+              0 numbers
+            </span>
+          </div>
+
+          {# Tag preview — shows each number as a pill after typing #}
+          <div id="phonePills" class="flex flex-wrap gap-1.5 mt-2 empty:hidden"></div>
+
+          <p class="text-xs text-amber-400 mt-1.5">
+            <i data-lucide="info" class="w-3 h-3 inline-block mr-0.5"></i>
+            These numbers are sent to directly via SMS — they don't need to be registered members.
+            Numbers already in the system will also get any email if applicable.
+          </p>
+        </div>
+
       </div>
 
       <!-- BUTTONS -->
       <div class="flex gap-3 pt-2">
         <button type="submit" name="action" value="send" class="btn-gold">
-          Send Now
+          <i data-lucide="send" class="w-3.5 h-3.5"></i>Send Now
         </button>
-
         <button type="submit" name="action" value="draft" class="btn-outline">
-          Save Draft
+          <i data-lucide="file-text" class="w-3.5 h-3.5"></i>Save Draft
         </button>
-
         <a href="{% url 'message_list' %}" class="btn-outline">Cancel</a>
       </div>
 
     </form>
-
   </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
+  // ── Send-to-all toggle ──
   const sendToAllCheckbox = document.querySelector('[name="send_to_all"]');
-  const filtersBox = document.getElementById('filtersBox');
+  const filtersBox        = document.getElementById('filtersBox');
 
   function toggleFilters() {
-    if (sendToAllCheckbox.checked) {
-      filtersBox.classList.add('hidden');
-    } else {
-      filtersBox.classList.remove('hidden');
-    }
+    filtersBox.classList.toggle('hidden', sendToAllCheckbox.checked);
   }
-
   sendToAllCheckbox.addEventListener('change', toggleFilters);
   toggleFilters();
 
-  // Apply styling
-  document.querySelectorAll('select,input,textarea').forEach(el => {
+  // ── Apply base styling to all form controls ──
+  document.querySelectorAll('select, input, textarea').forEach(el => {
     if (!el.classList.contains('input-field') && el.type !== 'checkbox') {
       el.classList.add('input-field');
+    }
+  });
+
+  // ── Phone number pills preview ──
+  const phoneArea  = document.getElementById('manualPhones');
+  const pillsBox   = document.getElementById('phonePills');
+  const countBadge = document.getElementById('phoneCount');
+
+  function parsePhones(raw) {
+    return raw
+      .split(',')
+      .map(n => n.trim())
+      .filter(n => n.length > 0);
+  }
+
+  function renderPills(phones) {
+    pillsBox.innerHTML = '';
+    if (phones.length === 0) {
+      countBadge.classList.add('hidden');
+      return;
+    }
+
+    phones.forEach(num => {
+      const pill = document.createElement('span');
+      // Simple validity hint: Nigerian/international numbers are 10-14 digits
+      const digits = num.replace(/\D/g, '');
+      const valid  = digits.length >= 10 && digits.length <= 15;
+      pill.className = `inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium
+        ${valid
+          ? 'bg-teal-50 text-teal-700 border border-teal-200'
+          : 'bg-red-50 text-red-600 border border-red-200'}`;
+      pill.innerHTML = `
+        <i data-lucide="${valid ? 'phone' : 'alert-circle'}" class="w-2.5 h-2.5"></i>
+        ${num}`;
+      pillsBox.appendChild(pill);
+    });
+
+    // Re-init lucide for dynamically added icons
+    lucide.createIcons();
+
+    countBadge.textContent = `${phones.length} number${phones.length !== 1 ? 's' : ''}`;
+    countBadge.classList.remove('hidden');
+  }
+
+  phoneArea.addEventListener('input', () => {
+    renderPills(parsePhones(phoneArea.value));
+  });
+
+  // ── Validate before submit: warn if manual phones look wrong ──
+  document.getElementById('msgForm').addEventListener('submit', function(e) {
+    const raw    = phoneArea.value.trim();
+    if (!raw) return; // nothing entered — fine
+
+    const phones = parsePhones(raw);
+    const bad    = phones.filter(n => {
+      const d = n.replace(/\D/g, '');
+      return d.length < 10 || d.length > 15;
+    });
+
+    if (bad.length > 0) {
+      const go = confirm(
+        `${bad.length} number(s) look invalid:\n${bad.join('\n')}\n\nSend anyway?`
+      );
+      if (!go) e.preventDefault();
     }
   });
 </script>

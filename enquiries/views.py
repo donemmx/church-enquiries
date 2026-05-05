@@ -27,35 +27,55 @@ from accounts.models import UserProfile
 def send_sms(phone, message):
     """
     Sends an SMS using the Termii API.
-    Expects `phone` to be in international format: +234XXXXXXXXXX
+    Termii requires numbers in international format WITHOUT the + sign.
+    e.g.  09030406498  →  2349030406498
+          +2349030406498 →  2349030406498
+          2349030406498  →  2349030406498  (already correct, left as-is)
     """
     if not phone or not message:
         return None
 
-    if not phone.startswith('+'):
-        phone = '+' + phone
+    # ── Normalise to Termii format: digits only, Nigerian 234 prefix ──
+    phone = phone.strip()
+    phone = phone.replace(' ', '').replace('-', '')  # strip spaces/dashes
 
+    # Remove leading + if present
+    if phone.startswith('+'):
+        phone = phone[1:]
+
+    # Convert local 0XXXXXXXXX  →  234XXXXXXXXX
+    if phone.startswith('0') and len(phone) == 11:
+        phone = '234' + phone[1:]
+
+    # At this point phone should be e.g. 2349030406498
     payload = {
-        "to": phone,
-        "from": settings.TERMII_SENDER_ID,
-        "sms": message,
-        "type": "plain",
+        "to":      phone,
+        "from":    settings.TERMII_SENDER_ID,
+        "sms":     message,
+        "type":    "plain",
         "channel": "generic",
         "api_key": settings.TERMII_API_KEY,
     }
+
+    print(f"[SMS] Sending to normalised number: {phone}")
 
     try:
         response = requests.post(settings.TERMII_SMS_URL, json=payload, timeout=10)
         response.raise_for_status()
         result = response.json()
-        if result.get("status") != "success":
-            print(f"SMS not sent: {result}")
+        if result.get("code") != "ok":
+            print(f"[SMS] Termii rejected: {result}")
+        else:
+            print(f"[SMS] Sent OK → {result}")
         return result
+    except requests.exceptions.HTTPError as e:
+        print(f"[SMS] HTTP error {e.response.status_code}: {e.response.text}")
+        return None
     except requests.exceptions.RequestException as e:
-        print(f"SMS request failed: {e}")
+        print(f"[SMS] Request failed: {e}")
         return None
     except ValueError:
-        print("Failed to decode JSON response from SMS API")
+        print("[SMS] Failed to decode JSON response from Termii")
         return None
 
 
@@ -691,34 +711,46 @@ def message_create(request):
         form = MessageForm(request.POST)
 
         if form.is_valid():
-            msg = form.save(commit=False)
+            msg        = form.save(commit=False)
             msg.sender = request.user
             msg.save()
             form.save_m2m()
 
-            action = request.POST.get('action', 'draft')
+            action      = request.POST.get('action', 'draft')
             send_to_all = request.POST.get('send_to_all') == 'on'
 
-            # 🔥 START WITH BASE QUERYSET
-            members = Member.objects.filter(is_active=True)
+            # ── Parse manual phone numbers (comma-separated) ──
+            raw_phones    = request.POST.get('manual_phones', '').strip()
+            manual_phones = [
+                p.strip() for p in raw_phones.split(',')
+                if p.strip()
+            ] if raw_phones else []
 
-            # 🔥 APPLY FILTERS ONLY IF NOT "SEND TO ALL"
-            if not send_to_all:
-                date_from = request.POST.get('date_from')
-                date_to = request.POST.get('date_to')
+            # ── Always read date filters up front (avoids NameError on line below) ──
+            date_from = request.POST.get('date_from', '').strip()
+            date_to   = request.POST.get('date_to', '').strip()
 
-                # If recipients manually selected → use them
-                if msg.recipients.exists():
-                    members = msg.recipients.all()
-                else:
-                    if date_from:
-                        members = members.filter(created_at__date__gte=date_from)
+            # ── Build the registered-member queryset ──
+            if send_to_all:
+                # Send to every active member
+                members = Member.objects.filter(is_active=True)
 
-                    if date_to:
-                        members = members.filter(created_at__date__lte=date_to)
+            elif manual_phones and not msg.recipients.exists() and not date_from and not date_to:
+                # ONLY manual phones entered — skip registered members entirely
+                members = Member.objects.none()
 
+            elif msg.recipients.exists():
+                # Specific recipients selected on the form
+                members = msg.recipients.all()
 
-            # 🚀 ACTION HANDLING
+            else:
+                # Date-range filter (or no filter = all active members)
+                members = Member.objects.filter(is_active=True)
+                if date_from:
+                    members = members.filter(created_at__date__gte=date_from)
+                if date_to:
+                    members = members.filter(created_at__date__lte=date_to)
+
             if action == 'send':
                 if msg.scheduled_at and msg.scheduled_at > timezone.now():
                     msg.status = 'scheduled'
@@ -727,11 +759,11 @@ def message_create(request):
                         f'Message "{msg.title}" scheduled for {msg.scheduled_at}.'
                     )
                 else:
-                    msg.status = 'sent'
+                    msg.status  = 'sent'
                     msg.sent_at = timezone.now()
+                    total_sent  = 0
 
-                    total_sent = 0
-
+                    # ── Send to registered members ──
                     for member in members:
                         if msg.message_type in ('email', 'both') and member.email:
                             send_mail(
@@ -739,27 +771,28 @@ def message_create(request):
                                 msg.body,
                                 settings.DEFAULT_FROM_EMAIL,
                                 [member.email],
-                                fail_silently=False
+                                fail_silently=False,
                             )
-
                         if msg.message_type in ('sms', 'both') and member.phone:
                             send_sms(member.phone, msg.body)
+                        total_sent += 1
 
+                    # ── Send to manually entered phone numbers via SMS always ──
+                    for phone in manual_phones:
+                        result = send_sms(phone, msg.body)
+                        print(f"[SMS manual] {phone} → {result}")
                         total_sent += 1
 
                     msg.total_sent = total_sent
-
                     messages.success(
                         request,
-                        f'Message "{msg.title}" sent to {total_sent} recipients!'
+                        f'Message "{msg.title}" sent to {total_sent} recipient(s)!'
+                        + (f' Including {len(manual_phones)} manual number(s).' if manual_phones else '')
                     )
 
             else:
                 msg.status = 'draft'
-                messages.success(
-                    request,
-                    f'Message "{msg.title}" saved as draft.'
-                )
+                messages.success(request, f'Message "{msg.title}" saved as draft.')
 
             msg.save()
             return redirect('message_list')
@@ -768,11 +801,13 @@ def message_create(request):
         form = MessageForm()
 
     return render(request, 'enquiries/message_form.html', {
-        'form': form,
-        'title': 'Compose Message',
-        'staff': staff,
+        'form':           form,
+        'title':          'Compose Message',
+        'staff':          staff,
         'status_choices': Member.STATUS_CHOICES,
     })
+
+
 
 
 @login_required
@@ -983,17 +1018,20 @@ def staff_delete(request, pk):
 
     if not can_see_all(request.user) and profile.section != get_section(request.user):
         messages.error(request, 'Access denied.')
-        return redirect('staff_list')
+        return redirect('')
 
     if request.method == 'POST':
         staff.is_active = False
         staff.save()
         messages.success(request, 'Staff member deactivated successfully.')
-        return redirect('staff_list')
+        return redirect('admin_staff')
 
     return render(request, 'enquiries/confirm_delete.html', {
         'object': staff, 'type': 'staff member'
     })
+
+def admin_staff(request):
+    return render(request, 'admin_panel/staff_list.html')
 
 
 @login_required
@@ -1501,3 +1539,222 @@ def integration_quick(request, member_pk):
             messages.info(request, f'{member.get_full_name()} is already integrated.')
 
     return redirect(request.POST.get('next', 'member_list'))
+
+
+
+
+
+
+
+
+
+
+
+import io
+import openpyxl
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.utils import timezone
+
+
+def _clean(val):
+    if val is None:
+        return None
+    s = str(val).strip()
+    return s if s else None
+
+
+def _find_col(col_map, *aliases):
+    """Find column index by trying multiple aliases, with partial matching."""
+    for alias in aliases:
+        alias_lower = alias.lower()
+        if alias_lower in col_map:
+            return col_map[alias_lower]
+        for key, idx in col_map.items():
+            if alias_lower in key or key in alias_lower:
+                return idx
+    return None
+
+
+@login_required
+def bulk_upload(request):
+    from .models import Member
+    from django.contrib.auth.models import User
+
+    if not is_section_admin(request.user):
+        messages.error(request, "Only section admins can bulk upload members.")
+        return redirect("member_list")
+
+    followup_staff = User.objects.filter(is_active=True, profile__section__in=["followup", "all"])
+    greeter_staff  = User.objects.filter(is_active=True, profile__section__in=["greeters", "all"])
+
+    if request.method != "POST":
+        return render(request, "enquiries/bulk_upload.html", {
+            "followup_staff":   followup_staff,
+            "greeter_staff":    greeter_staff,
+            "is_section_admin": is_section_admin(request.user),
+        })
+
+    excel_file         = request.FILES.get("excel_file")
+    default_status     = request.POST.get("default_status", "new")
+    on_duplicate       = request.POST.get("on_duplicate", "skip")
+    assign_followup_pk = request.POST.get("assign_followup", "")
+    assign_greeter_pk  = request.POST.get("assign_greeter", "")
+    assign_followup    = User.objects.filter(pk=assign_followup_pk).first() if assign_followup_pk else None
+    assign_greeter     = User.objects.filter(pk=assign_greeter_pk).first()  if assign_greeter_pk  else None
+
+    if not excel_file:
+        messages.error(request, "Please choose an Excel file.")
+        return redirect("bulk_upload")
+
+    try:
+        wb = openpyxl.load_workbook(excel_file, data_only=True)
+    except Exception as e:
+        messages.error(request, f"Could not read file: {e}")
+        return redirect("bulk_upload")
+
+    ws = wb.active  # Use first sheet, whatever it's named
+
+    # ── Find header row (scan first 10 rows) ──
+    KNOWN = {"first name", "last name", "lastname", "firstname",
+              "email", "phone", "address", "name", "surname"}
+    header_row_idx = None
+    for row in ws.iter_rows(min_row=1, max_row=10):
+        vals = [str(c.value).strip().lower() for c in row if c.value]
+        if any(v in KNOWN or any(k in v for k in KNOWN) for v in vals):
+            header_row_idx = row[0].row
+            break
+
+    if header_row_idx is None:
+        messages.error(
+            request,
+            "Could not find a header row in the first 10 rows. "
+            "Make sure the file has headers like: First Name, Last Name, Email, Phone, Address."
+        )
+        return redirect("bulk_upload")
+
+    header_vals = list(ws.iter_rows(
+        min_row=header_row_idx, max_row=header_row_idx, values_only=True
+    ))[0]
+    col_map = {
+        str(h).strip().lower(): i
+        for i, h in enumerate(header_vals) if h is not None
+    }
+
+    idx_first   = _find_col(col_map, "first name", "firstname", "first")
+    idx_last    = _find_col(col_map, "last name", "lastname", "surname", "last")
+    idx_email   = _find_col(col_map, "email", "email address", "e-mail")
+    idx_phone   = _find_col(col_map, "phone", "phone number", "mobile", "telephone", "tel")
+    idx_address = _find_col(col_map, "address", "home address", "residential address")
+
+    if idx_first is None or idx_last is None:
+        messages.error(
+            request,
+            f"Could not find 'First Name' or 'Last Name' columns. "
+            f"Columns detected: {', '.join(col_map.keys())}"
+        )
+        return redirect("bulk_upload")
+
+    def get_val(row_vals, idx):
+        if idx is None or idx >= len(row_vals):
+            return None
+        return row_vals[idx]
+
+    result = {
+        "total":        0,
+        "created":      0,
+        "updated":      0,
+        "skipped":      0,
+        "errors":       [],
+        "skipped_rows": [],
+        "detected_cols": {
+            "First Name": idx_first   is not None,
+            "Last Name":  idx_last    is not None,
+            "Email":      idx_email   is not None,
+            "Phone":      idx_phone   is not None,
+            "Address":    idx_address is not None,
+        },
+    }
+
+    today = timezone.now().date()
+
+    for row_idx, row in enumerate(
+        ws.iter_rows(min_row=header_row_idx + 1, values_only=True),
+        start=header_row_idx + 1,
+    ):
+        if all(v is None or str(v).strip() == "" for v in row):
+            continue
+
+        first_name = _clean(get_val(row, idx_first))
+        last_name  = _clean(get_val(row, idx_last))
+
+        if not first_name and not last_name:
+            continue
+
+        result["total"] += 1
+
+        if not first_name or not last_name:
+            result["skipped"] += 1
+            result["errors"].append({
+                "row":    row_idx,
+                "name":   f"{first_name or ''} {last_name or ''}".strip() or "—",
+                "reason": "Missing First Name or Last Name.",
+            })
+            continue
+
+        email   = _clean(get_val(row, idx_email))
+        phone   = _clean(get_val(row, idx_phone))
+        address = _clean(get_val(row, idx_address))
+
+        # Duplicate check by email
+        existing = Member.objects.filter(email=email).first() if email else None
+
+        if existing and on_duplicate == "skip":
+            result["skipped"] += 1
+            result["skipped_rows"].append({
+                "row":   row_idx,
+                "name":  f"{first_name} {last_name}",
+                "email": email,
+            })
+            continue
+
+        try:
+            if existing and on_duplicate == "update":
+                existing.first_name = first_name
+                existing.last_name  = last_name
+                if phone:   existing.phone   = phone
+                if address: existing.address = address
+                if assign_followup: existing.assigned_to         = assign_followup
+                if assign_greeter:  existing.greeter_assigned_to = assign_greeter
+                existing.save()
+                result["updated"] += 1
+            else:
+                Member.objects.create(
+                    first_name          = first_name,
+                    last_name           = last_name,
+                    email               = email,
+                    phone               = phone,
+                    address             = address,
+                    status              = default_status,
+                    first_visit_date    = today,
+                    created_by          = request.user,
+                    assigned_to         = assign_followup,
+                    greeter_assigned_to = assign_greeter,
+                )
+                result["created"] += 1
+
+        except Exception as e:
+            result["skipped"] += 1
+            result["errors"].append({
+                "row":    row_idx,
+                "name":   f"{first_name} {last_name}",
+                "reason": str(e),
+            })
+
+    return render(request, "enquiries/bulk_upload.html", {
+    "followup_staff":   followup_staff,
+    "greeter_staff":    greeter_staff,
+    "is_section_admin": is_section_admin(request.user),
+    "col_list": ["First Name", "Last Name", "Phone Number", "Email", "Address"],  # ← add this
+})

@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}Bulk Upload Members — MIV Ojoo{% endblock %}
+{% block page_title %}Bulk Upload Members{% endblock %}
+{% block page_subtitle %}Import multiple first-timers at once from an Excel file{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+
+  {# ── Info banner ── #}
+  <div class="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-6 flex items-start gap-3">
+    <i data-lucide="info" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+    <div class="text-sm text-blue-700">
+      <p class="font-semibold mb-1">Excel file requirements</p>
+      <p>Your file must have a header row with these columns (in any order, any sheet):</p>
+      <div class="flex flex-wrap gap-1.5 mt-2">
+  {% for col in col_list %}
+  <span class="inline-flex items-center gap-1 bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full">
+    <i data-lucide="columns" class="w-3 h-3"></i>{{ col }}
+  </span>
+  {% endfor %}
+</div>
+      <p class="mt-2 text-blue-600 text-xs">Supported formats: .xlsx, .xls — First Name and Last Name are required per row.</p>
+    </div>
+  </div>
+
+  {# ── Upload form card ── #}
+  <div class="card p-6">
+    <h3 style="font-family:'Playfair Display',serif;" class="font-semibold text-blue-950 mb-5 flex items-center gap-2">
+      <i data-lucide="upload" class="w-4 h-4 text-blue-500"></i>Upload Configuration
+    </h3>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+
+      <div class="space-y-5">
+
+        {# ── File picker ── #}
+        <div>
+          <label class="form-label">Excel File <span class="text-red-400">*</span></label>
+          <div id="drop-zone"
+               class="relative border-2 border-dashed border-blue-200 rounded-xl p-8 text-center hover:border-blue-400 hover:bg-blue-50/40 transition-colors cursor-pointer"
+               onclick="document.getElementById('excel_file').click()">
+            <i data-lucide="file-spreadsheet" class="w-10 h-10 text-blue-300 mx-auto mb-2"></i>
+            <p id="file-label" class="text-sm font-medium text-blue-700">Click to choose file or drag &amp; drop here</p>
+            <p class="text-xs text-blue-400 mt-1">.xlsx or .xls only</p>
+            <input type="file" id="excel_file" name="excel_file" accept=".xlsx,.xls"
+                   class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                   onchange="updateFileLabel(this)">
+          </div>
+        </div>
+
+        {# ── Default status ── #}
+        <div>
+          <label class="form-label">Default Status for Imported Members</label>
+          <select name="default_status" class="input-field">
+            <option value="new" selected>New Visitor</option>
+            <option value="integrated">Member (Integrated)</option>
+            <option value="inactive">Inactive</option>
+          </select>
+          <p class="text-xs text-blue-400 mt-1">Every imported row will be set to this status.</p>
+        </div>
+
+        {# ── Duplicate handling ── #}
+        <div>
+          <label class="form-label">If a member with the same email already exists…</label>
+          <div class="grid grid-cols-2 gap-3 mt-1">
+            <label class="flex items-start gap-2.5 p-3 rounded-xl border-2 border-blue-100 hover:border-blue-300 cursor-pointer transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+              <input type="radio" name="on_duplicate" value="skip" checked class="mt-0.5 accent-blue-600">
+              <div>
+                <p class="text-sm font-semibold text-blue-900">Skip</p>
+                <p class="text-xs text-blue-500">Leave existing record unchanged</p>
+              </div>
+            </label>
+            <label class="flex items-start gap-2.5 p-3 rounded-xl border-2 border-blue-100 hover:border-blue-300 cursor-pointer transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+              <input type="radio" name="on_duplicate" value="update" class="mt-0.5 accent-blue-600">
+              <div>
+                <p class="text-sm font-semibold text-blue-900">Update</p>
+                <p class="text-xs text-blue-500">Overwrite name, phone and address</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        {# ── Auto-assign Follow-Up staff ── #}
+        <div>
+          <label class="form-label">Auto-assign to Follow-Up Staff <span class="text-blue-300 font-normal">(optional)</span></label>
+          <select name="assign_followup" class="input-field">
+            <option value="">— Don't assign —</option>
+            {% for s in followup_staff %}
+            <option value="{{ s.pk }}">{{ s.get_full_name|default:s.username }}</option>
+            {% endfor %}
+          </select>
+          <p class="text-xs text-blue-400 mt-1">All imported members will be assigned to this staff for follow-up.</p>
+        </div>
+
+        {# ── Auto-assign Greeter ── #}
+        <div>
+          <label class="form-label">Auto-assign to Greeter <span class="text-blue-300 font-normal">(optional)</span></label>
+          <select name="assign_greeter" class="input-field">
+            <option value="">— Don't assign —</option>
+            {% for s in greeter_staff %}
+            <option value="{{ s.pk }}">{{ s.get_full_name|default:s.username }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        {# ── Submit ── #}
+        <div class="flex items-center gap-3 pt-2 border-t border-blue-50">
+          <button type="submit" id="submit-btn" class="btn-gold">
+            <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+            Import Members
+          </button>
+          <a href="{% url 'member_list' %}" class="btn-outline">Cancel</a>
+          <span id="loading-msg" class="hidden text-sm text-blue-500 flex items-center gap-2 ml-2">
+            <svg class="animate-spin w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+            </svg>
+            Importing…
+          </span>
+        </div>
+
+      </div>
+    </form>
+  </div>
+
+  {# ── Download sample template hint ── #}
+  <div class="mt-4 text-center">
+    <p class="text-xs text-blue-400">
+      Need a template? Create an Excel file with headers:
+      <span class="font-semibold text-blue-600">First Name | Last Name | Phone Number | Email | Address</span>
+    </p>
+  </div>
+
+</div>
+
+<script>
+  function updateFileLabel(input) {
+    const label = document.getElementById('file-label');
+    const zone  = document.getElementById('drop-zone');
+    if (input.files && input.files[0]) {
+      label.textContent = '✓ ' + input.files[0].name;
+      label.classList.add('text-blue-900', 'font-bold');
+      zone.classList.add('border-blue-500', 'bg-blue-50/60');
+    }
+  }
+
+  // Drag-and-drop
+  const zone = document.getElementById('drop-zone');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('border-blue-500', 'bg-blue-50'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('border-blue-500', 'bg-blue-50'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('border-blue-500', 'bg-blue-50');
+    const input = document.getElementById('excel_file');
+    input.files = e.dataTransfer.files;
+    updateFileLabel(input);
+  });
+
+  // Show loading on submit
+  document.querySelector('form').addEventListener('submit', function() {
+    const btn = document.getElementById('submit-btn');
+    const msg = document.getElementById('loading-msg');
+    btn.disabled = true;
+    btn.classList.add('opacity-60');
+    msg.classList.remove('hidden');
+  });
+</script>
+{% endblock %}

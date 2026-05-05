@@ -54,7 +54,7 @@ urlpatterns = [
 
     # Admin Panel
     path('admin-panel/', views.admin_panel, name='admin_panel'),
-    # path('admin-panel/staff/', views.admin_staff, name='admin_staff'),
+    path('admin-panel/staff/', views.admin_staff, name='admin_staff'),
     path('admin-panel/reports/', views.admin_reports, name='admin_reports'),
     path("staff/<int:pk>/delete/", views.staff_delete, name="staff_delete"),
 
@@ -79,5 +79,8 @@ urlpatterns = [
     path('members/<int:member_pk>/log-contact/',  views.contact_log_create, name='contact_log_create'),
     path('contact-logs/<int:pk>/delete/',         views.contact_log_delete,  name='contact_log_delete'),
     # path('contact-logs/',                         views.contact_log_list,    name='contact_log_list'),
-    
+
+
+    path('members/bulk-upload/', views.bulk_upload, name='bulk_upload'),
+    path('members/bulk-upload/result/', views.bulk_upload, name='bulk_upload_result'),
 ]

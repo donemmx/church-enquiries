@@ -383,11 +383,7 @@ class Note(models.Model):
 class Integration(models.Model):
     PATHWAY_CHOICES = [
         ('Fully Integrated', 'Fully Integrated'),
-        # ('membership_class', 'Membership Class'),
-        # ('water_baptism', 'Water Baptism'),
-        # ('cell_group', 'Cell Group'),
-        # ('ministry', 'Ministry Involvement'),
-        # ('other', 'Other'),
+        
     ]
     member = models.OneToOneField(Member, on_delete=models.CASCADE, related_name='integration')
     integrated_on = models.DateField(default=timezone.now)

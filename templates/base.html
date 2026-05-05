@@ -275,6 +275,11 @@
           <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>Messages
         </a>
 
+        <p class="text-blue-400/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Upload</p>
+        <a href="{% url 'bulk_upload' %}" class="sidebar-link {% if request.resolver_match.url_name == 'bulk_upload' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
+          <i data-lucide="upload" class="w-4 h-4 flex-shrink-0"></i>Bulk Upload
+        </a>
+
         <p class="text-blue-400/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Admin</p>
         <a href="{% url 'admin_panel' %}" class="sidebar-link {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
           <i data-lucide="shield" class="w-4 h-4 flex-shrink-0"></i>Admin Panel
@@ -297,6 +302,11 @@
         </a>
         <a href="{% url 'message_list' %}" class="sidebar-link {% if 'message' in request.resolver_match.url_name|default:'' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
           <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>Messages
+        </a>
+
+        <p class="text-blue-400/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Upload</p>
+        <a href="{% url 'bulk_upload' %}" class="sidebar-link {% if request.resolver_match.url_name == 'bulk_upload' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
+          <i data-lucide="upload" class="w-4 h-4 flex-shrink-0"></i>Bulk Upload
         </a>
 
         <p class="text-blue-400/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Admin</p>
@@ -336,6 +346,11 @@
         <p class="text-blue-400/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Records</p>
         <a href="{% url 'integration_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'integration_list' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
           <i data-lucide="check-square" class="w-4 h-4 flex-shrink-0"></i>Integrations
+        </a>
+
+        <p class="text-blue-400/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Upload</p>
+        <a href="{% url 'bulk_upload' %}" class="sidebar-link {% if request.resolver_match.url_name == 'bulk_upload' %}active{% endif %} flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-blue-200/80 text-sm">
+          <i data-lucide="upload" class="w-4 h-4 flex-shrink-0"></i>Bulk Upload
         </a>
 
         <p class="text-blue-400/50 text-xs font-semibold uppercase tracking-widest px-3 mt-5 mb-2">Admin</p>

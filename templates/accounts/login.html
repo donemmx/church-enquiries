@@ -3,52 +3,68 @@
 
 {% block auth_content %}
 {% load static %}
-<div class="min-h-screen flex" style="background: linear-gradient(135deg, #2310c9 0%, #2310c9 50%, #2310c9 100%);">
+<div class="min-h-screen flex" style="background: linear-gradient(135deg, #0f1b3d 0%, #1e3a8a 50%, #172554 100%);">
+
+  {# ── Left panel (desktop only) ── #}
   <div class="hidden lg:flex lg:w-1/2 flex-col items-center justify-center px-16 relative overflow-hidden">
-    <div class="absolute inset-0" style="background-image:url('data:image/svg+xml,%3Csvg width=60 height=60 viewBox=0 0 60 60 xmlns=http://www.w3.org/2000/svg%3E%3Cpath d=M27 0h6v60h-6zM0 27h60v6H0z fill=%23eec548 fill-opacity=.06/%3E%3C/svg%3E');"></div>
+    <div class="absolute inset-0" style="background-image:url('data:image/svg+xml,%3Csvg width=60 height=60 viewBox=0 0 60 60 xmlns=http://www.w3.org/2000/svg%3E%3Cpath d=M27 0h6v60h-6zM0 27h60v6H0z fill=%2393c5fd fill-opacity=.06/%3E%3C/svg%3E');"></div>
     <div class="relative text-center">
-      <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-2xl">
-        <!-- <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg> -->
-        <img src="{% static 'accounts/images/MIV.png' %}" alt="" style="border-radius: 50%;">
+
+      <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-2xl overflow-hidden">
+        <img src="{% static 'accounts/images/MIV.png' %}" alt="MIV Logo" style="border-radius:50%; width:100%; height:100%; object-fit:cover;">
       </div>
-      
-      <h1 style="font-family:'Playfair Display',serif;" class="text-4xl font-bold text-yellow-100 mb-4">MIV Ojoo</h1>
-      <p class="text-yellow-300/70 text-lg mb-10">Enquiries & Membership Portal</p>
+
+      <h1 style="font-family:'Playfair Display',serif;" class="text-4xl font-bold text-blue-100 mb-4">MIV Ojoo</h1>
+      <p class="text-blue-300/70 text-lg mb-10">Enquiries &amp; Membership Portal</p>
+
       <div class="space-y-4 text-left">
-        <div class="flex items-center gap-3 bg-white/8 rounded-xl px-4 py-3" style="background:rgba(255,255,255,0.07);">
-          <i data-lucide="users" class="w-5 h-5 text-yellow-400 flex-shrink-0"></i>
+        <div class="flex items-center gap-3 rounded-xl px-4 py-3" style="background:rgba(255,255,255,0.07);">
+          <i data-lucide="users" class="w-5 h-5 text-blue-300 flex-shrink-0"></i>
           <div>
-            <p class="text-yellow-100 text-sm font-medium">Member Management</p>
-            <p class="text-yellow-500/60 text-xs">Track new visitors and full members</p>
+            <p class="text-blue-100 text-sm font-medium">Member Management</p>
+            <p class="text-blue-400/60 text-xs">Track new visitors and full members</p>
           </div>
         </div>
         <div class="flex items-center gap-3 rounded-xl px-4 py-3" style="background:rgba(255,255,255,0.07);">
-          <i data-lucide="check-square" class="w-5 h-5 text-yellow-400 flex-shrink-0"></i>
+          <i data-lucide="check-square" class="w-5 h-5 text-blue-300 flex-shrink-0"></i>
           <div>
-            <p class="text-yellow-100 text-sm font-medium">Follow-Up Delegation</p>
-            <p class="text-yellow-500/60 text-xs">Assign tasks to your team efficiently</p>
+            <p class="text-blue-100 text-sm font-medium">Follow-Up Delegation</p>
+            <p class="text-blue-400/60 text-xs">Assign tasks to your team efficiently</p>
           </div>
         </div>
         <div class="flex items-center gap-3 rounded-xl px-4 py-3" style="background:rgba(255,255,255,0.07);">
-          <i data-lucide="mail" class="w-5 h-5 text-yellow-400 flex-shrink-0"></i>
+          <i data-lucide="mail" class="w-5 h-5 text-blue-300 flex-shrink-0"></i>
           <div>
-            <p class="text-yellow-100 text-sm font-medium">Messaging & Notifications</p>
-            <p class="text-yellow-500/60 text-xs">Email, SMS, prayer messages & more</p>
+            <p class="text-blue-100 text-sm font-medium">Messaging &amp; Notifications</p>
+            <p class="text-blue-400/60 text-xs">Email, SMS, prayer messages &amp; more</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 rounded-xl px-4 py-3" style="background:rgba(255,255,255,0.07);">
+          <i data-lucide="hand" class="w-5 h-5 text-blue-300 flex-shrink-0"></i>
+          <div>
+            <p class="text-blue-100 text-sm font-medium">Greeter Assignments</p>
+            <p class="text-blue-400/60 text-xs">Welcome visitors and track contact</p>
           </div>
         </div>
       </div>
     </div>
   </div>
 
+  {# ── Right panel — login form ── #}
   <div class="w-full lg:w-1/2 flex items-center justify-center p-8">
     <div class="w-full max-w-md">
       <div class="bg-white rounded-2xl shadow-2xl p-8">
+
         <div class="text-center mb-8">
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-800 flex items-center justify-center mx-auto mb-4 shadow-lg">
+          {# Mobile logo (hidden on desktop where sidebar panel shows it) #}
+          <div class="w-14 h-14 rounded-xl overflow-hidden mx-auto mb-4 shadow-lg lg:hidden">
+            <img src="{% static 'accounts/images/MIV.png' %}" alt="MIV Logo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-800 items-center justify-center mx-auto mb-4 shadow-lg hidden lg:flex">
             <i data-lucide="lock" class="w-5 h-5 text-white"></i>
           </div>
-          <h2 style="font-family:'Playfair Display',serif;" class="text-2xl font-bold text-amber-950">Welcome Back</h2>
-          <p class="text-amber-600/60 text-sm mt-1">Sign in to continue to the portal</p>
+          <h2 style="font-family:'Playfair Display',serif;" class="text-2xl font-bold text-blue-950">Welcome Back</h2>
+          <p class="text-blue-600/60 text-sm mt-1">Sign in to continue to the portal</p>
         </div>
 
         {% if form.errors %}
@@ -60,36 +76,50 @@
 
         <form method="post" class="space-y-5">
           {% csrf_token %}
+
           <div>
             <label class="form-label">Username</label>
-            <input type="text" name="username" class="input-field" placeholder="Enter your username" required autofocus>
+            <div class="relative">
+              <i data-lucide="user" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 pointer-events-none"></i>
+              <input type="text" name="username" class="input-field pl-9" placeholder="Enter your username" required autofocus>
+            </div>
           </div>
+
           <div>
             <label class="form-label">Password</label>
             <div class="relative">
-              <input type="password" name="password" id="pwField" class="input-field pr-10" placeholder="Enter your password" required>
-              <button type="button" onclick="togglePw()" class="absolute right-3 top-1/2 -translate-y-1/2 text-amber-400 hover:text-amber-600">
+              <i data-lucide="lock" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 pointer-events-none"></i>
+              <input type="password" name="password" id="pwField" class="input-field pl-9 pr-10" placeholder="Enter your password" required>
+              <button type="button" onclick="togglePw()"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-blue-300 hover:text-blue-600 transition-colors">
                 <i data-lucide="eye" class="w-4 h-4" id="eyeIcon"></i>
               </button>
             </div>
           </div>
+
           <input type="hidden" name="next" value="{{ next }}">
+
           <button type="submit" class="w-full btn-gold justify-center py-2.5 text-sm font-semibold">
             <i data-lucide="log-in" class="w-4 h-4"></i>Sign In
           </button>
         </form>
 
-        <p class="text-center text-xs text-amber-400/60 mt-6">MIV Ojoo Enquiries Portal &bull; Secure Access</p>
+        <p class="text-center text-xs text-blue-400/50 mt-6">
+          MIV Ojoo Enquiries Portal &bull; Secure Access
+        </p>
+
       </div>
     </div>
   </div>
+
 </div>
+
 <script>
   function togglePw() {
     const f = document.getElementById('pwField');
     const i = document.getElementById('eyeIcon');
-    if (f.type === 'password') { f.type = 'text'; i.setAttribute('data-lucide','eye-off'); }
-    else { f.type = 'password'; i.setAttribute('data-lucide','eye'); }
+    if (f.type === 'password') { f.type = 'text'; i.setAttribute('data-lucide', 'eye-off'); }
+    else { f.type = 'password'; i.setAttribute('data-lucide', 'eye'); }
     lucide.createIcons();
   }
 </script>
