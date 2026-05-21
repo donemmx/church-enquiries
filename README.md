@@ -64,6 +64,26 @@ A beautiful, full-featured Django web application for managing church enquiries,
 
 ## Quick Start
 
+### Docker (Recommended for deployment)
+
+```bash
+cp .env.example .env
+# Edit .env — set SECRET_KEY and ALLOWED_HOSTS for your host
+
+docker compose up --build -d
+
+# First-time seed data (optional)
+docker compose exec web python manage.py setup_initial_data
+```
+
+Open **http://localhost:8000**
+
+Stop the stack: `docker compose down`
+
+Data persists in Docker volumes (`app_data` for the database, `app_media` for uploads).
+
+---
+
 ### Prerequisites
 - Python 3.8 or higher
 - pip

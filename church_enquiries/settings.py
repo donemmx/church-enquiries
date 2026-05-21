@@ -1,13 +1,24 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-church-enquiries-change-this-in-production-2024'
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'django-insecure-church-enquiries-change-this-in-production-2024',
+)
 
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'true').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get('ALLOWED_HOSTS', '*').split(',')
+    if host.strip()
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -22,6 +33,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -53,7 +65,7 @@ WSGI_APPLICATION = 'church_enquiries.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': os.environ.get('DATABASE_PATH', str(BASE_DIR / 'db.sqlite3')),
     }
 }
 
@@ -70,8 +82,10 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / 'church_enquiries' / 'static']
+_static_dir = BASE_DIR / 'church_enquiries' / 'static'
+STATICFILES_DIRS = [_static_dir] if _static_dir.is_dir() else []
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -82,27 +96,25 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 # Email settings (configure for production)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'false').lower() in ('true', '1', 'yes')
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'false').lower() in ('true', '1', 'yes')
 
-EMAIL_PORT = 465
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = True
-
-EMAIL_HOST_USER = 'parachcomputers@gmail.com'
-EMAIL_HOST_PASSWORD = 'qxwphwjahefjyada'
-
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', '') or EMAIL_HOST_USER
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
 
-# TERMII SMS SETTINGS
-TERMII_API_KEY = "TLSRFdFLVgifWBQwMrTdQzykLCqAGKKhTOObsuiGYYusaKQuCOjjLwccOJmATm"
-TERMII_SENDER_ID = "MIV Ojoo"
-TERMII_SMS_URL = "https://api.ng.termii.com/api/sms/send"
+# TERMII SMS SETTINGS (see .env)
+TERMII_API_KEY = os.environ.get('TERMII_API_KEY', '')
+TERMII_SENDER_ID = os.environ.get('TERMII_SENDER_ID', '')
+TERMII_SMS_URL = os.environ.get('TERMII_SMS_URL', '')
 
 
 
